@@ -1,0 +1,5 @@
+@extends('layouts.admin')
+@section('title','Offers')
+@section('content')
+<section class="glass-card p-4"><div class="d-flex justify-content-between mb-4"><form method="get" class="d-flex gap-2"><select class="form-select" name="status"><option value="">All status</option>@foreach(['sent','accepted','declined','withdrawn'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ $status }}</option>@endforeach</select><button class="btn btn-primary">Search</button></form><a class="btn btn-outline-light" href="{{ route('admin.export','offers') }}">CSV Export</a></div><div class="table-responsive"><table class="table table-darkish"><thead><tr><th>ID</th><th>Organization</th><th>Coach</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead><tbody>@foreach($offers as $offer)<tr><td>{{ $offer->id }}</td><td>{{ $offer->organization->name }}</td><td>{{ $offer->coachProfile->name }}</td><td>{{ $offer->subject }}</td><td><span class="badge badge-soft">{{ $offer->status }}</span></td><td>{{ $offer->created_at->format('Y/m/d') }}</td></tr>@endforeach</tbody></table></div>{{ $offers->links() }}</section>
+@endsection
