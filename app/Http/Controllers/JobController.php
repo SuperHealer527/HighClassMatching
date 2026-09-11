@@ -30,11 +30,16 @@ class JobController extends Controller
             });
         }
 
-        match ($request->get('sort')) {
-            'deadline' => $query->orderBy('publish_end_at'),
-            'popular' => $query->withCount('applications')->orderByDesc('applications_count'),
-            default => $query->latest('publish_start_at'),
-        };
+        switch ($request->get('sort')) {
+            case 'deadline':
+                $query->orderBy('publish_end_at');
+                break;
+            case 'popular':
+                $query->withCount('applications')->orderByDesc('applications_count');
+                break;
+            default:
+                $query->latest('publish_start_at');
+        }
 
         return view('jobs.index', [
             'jobs' => $query->paginate(in_array((int)$request->per_page, [10,20,50]) ? (int)$request->per_page : 10)->withQueryString(),

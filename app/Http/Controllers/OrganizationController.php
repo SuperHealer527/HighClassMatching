@@ -53,7 +53,7 @@ class OrganizationController extends Controller
             'gender' => ['nullable', 'max:50'],
             'member_count' => ['nullable', 'integer'],
             'manager_name' => ['nullable', 'max:255'],
-            'manager_email' => ['nullable', 'email'],
+            'manager_email' => ['nullable', 'email', 'not_regex:/[\r\n]/'],
             'manager_phone' => ['nullable', 'max:50'],
             'official_url' => ['nullable', 'url'],
             'introduction' => ['nullable', 'max:5000'],

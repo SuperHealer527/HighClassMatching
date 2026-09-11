@@ -41,11 +41,16 @@ class CoachController extends Controller
         }
         if ($request->filled('sport')) $query->where('sports', 'like', '%'.$request->sport.'%');
         if ($request->boolean('verified')) $query->where('verification_status', 'verified');
-        match ($request->get('sort')) {
-            'rating' => $query->orderByDesc('reviews_avg_rating'),
-            'complete' => $query->orderByDesc('completeness_score'),
-            default => $query->latest('profile_updated_at'),
-        };
+        switch ($request->get('sort')) {
+            case 'rating':
+                $query->orderByDesc('reviews_avg_rating');
+                break;
+            case 'complete':
+                $query->orderByDesc('completeness_score');
+                break;
+            default:
+                $query->latest('profile_updated_at');
+        }
 
         return view('coaches.index', [
             'coaches' => $query->paginate(in_array((int)$request->per_page, [10,20,50]) ? (int)$request->per_page : 10)->withQueryString(),
@@ -101,7 +106,7 @@ class CoachController extends Controller
             'achievements' => ['nullable'],
             'desired_fee_range' => ['nullable', 'max:255'],
             'message' => ['nullable'],
-            'email' => ['nullable', 'email'],
+            'email' => ['nullable', 'email', 'not_regex:/[\r\n]/'],
             'phone' => ['nullable', 'max:50'],
             'available_prefectures' => ['nullable', 'array'],
             'available_prefectures.*' => ['in:'.implode(',', config('matching.prefectures'))],

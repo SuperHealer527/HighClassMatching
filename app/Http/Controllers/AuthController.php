@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'not_regex:/[\r\n]/'],
             'password' => ['required'],
         ]);
 
@@ -47,7 +47,7 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
+            'email' => ['required', 'email', 'not_regex:/[\r\n]/', 'unique:users,email'],
             'password' => ['required', 'min:8', 'confirmed'],
             'role' => ['required', 'in:coach,organization'],
         ]);

@@ -125,6 +125,17 @@ class ProductionWorkflowTest extends TestCase
             ->assertSee('aria-label="'.$prefecture.'、対応指導者'.($before + 1).'名"', false);
     }
 
+    public function test_registration_rejects_email_header_injection(): void
+    {
+        $this->post(route('register'), [
+            'name' => 'メール検証テスト',
+            'email' => "member@example.com\r\nBcc:attacker@example.com",
+            'password' => 'secure-password',
+            'password_confirmation' => 'secure-password',
+            'role' => 'coach',
+        ])->assertSessionHasErrors('email');
+    }
+
     private function records(): array
     {
         $coachUser=User::factory()->create(['role'=>'coach','status'=>'approved']);

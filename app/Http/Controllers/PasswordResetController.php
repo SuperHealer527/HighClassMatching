@@ -16,7 +16,7 @@ class PasswordResetController extends Controller
 
     public function send(Request $request)
     {
-        $request->validate(['email' => ['required', 'email']]);
+        $request->validate(['email' => ['required', 'email', 'not_regex:/[\r\n]/']]);
         $user = User::where('email', $request->email)->first();
         if ($user) {
             $token = Str::random(64);
@@ -31,7 +31,7 @@ class PasswordResetController extends Controller
 
     public function reset(Request $request)
     {
-        $data = $request->validate(['email' => ['required', 'email'], 'token' => ['required'], 'password' => ['required', 'min:8', 'confirmed']]);
+        $data = $request->validate(['email' => ['required', 'email', 'not_regex:/[\r\n]/'], 'token' => ['required'], 'password' => ['required', 'min:8', 'confirmed']]);
         $record = DB::table('password_resets')->where('email', $data['email'])->first();
         abort_unless($record && Hash::check($data['token'], $record->token) && now()->diffInMinutes(Carbon::parse($record->created_at)) <= 60, 422, '再設定リンクが無効または期限切れです。');
         User::where('email', $data['email'])->update(['password' => Hash::make($data['password']), 'remember_token' => Str::random(60)]);

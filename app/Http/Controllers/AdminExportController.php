@@ -17,7 +17,7 @@ class AdminExportController extends Controller
 {
     public function __invoke(string $resource): StreamedResponse
     {
-        [$headers, $rows] = match ($resource) {
+        $exports = [
             'users' => [['ID', '名前', 'メール', 'ロール', '状態', '登録日'], User::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->email, $v->role, $v->status, $v->created_at])],
             'coaches' => [['ID', '名前', '都道府県', '競技', '指導分野', '状態'], CoachProfile::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->main_prefecture, implode('/', $v->sports ?? []), implode('/', $v->fields ?? []), $v->status])],
             'organizations' => [['ID', '団体名', '都道府県', '競技', '状態'], Organization::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->main_prefecture, $v->sport, $v->status])],
@@ -27,8 +27,10 @@ class AdminExportController extends Controller
             'offers' => [['ID','団体ID','指導者ID','件名','状態','送信日'], Offer::latest()->get()->map(fn($v)=>[$v->id,$v->organization_id,$v->coach_profile_id,$v->subject,$v->status,$v->created_at])],
             'reviews' => [['ID','団体ID','指導者ID','評価','タイトル','状態'], Review::latest()->get()->map(fn($v)=>[$v->id,$v->organization_id,$v->coach_profile_id,$v->rating,$v->title,$v->status])],
             'articles' => [['ID','タイトル','カテゴリ','状態','公開日'], Article::latest()->get()->map(fn($v)=>[$v->id,$v->title,$v->category,$v->status,$v->published_at])],
-            default => abort(404),
-        };
+        ];
+
+        abort_unless(isset($exports[$resource]), 404);
+        [$headers, $rows] = $exports[$resource];
 
         return response()->streamDownload(function () use ($headers, $rows) {
             $output = fopen('php://output', 'w');
