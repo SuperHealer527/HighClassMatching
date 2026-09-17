@@ -4,7 +4,7 @@
 @endphp
 <section class="matching-promo">
     <div class="matching-promo-copy">
-        <div class="eyebrow">HIGH CLASS MATCHING</div>
+        <div class="eyebrow">Back Athlete Matching</div>
         <h2>{{ $promoTitle }}</h2>
         <p>{{ $promoText }}</p>
         <div class="promo-actions">

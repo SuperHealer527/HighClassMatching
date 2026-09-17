@@ -39,7 +39,7 @@ Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetFor
 Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'account.active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/admin', DashboardController::class)->middleware('admin')->name('admin.dashboard');
     Route::get('/coaches/create', [CoachController::class, 'create'])->name('coaches.create');

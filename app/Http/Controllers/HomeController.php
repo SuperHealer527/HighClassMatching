@@ -18,6 +18,9 @@ class HomeController extends Controller
             ->pluck('coach_count', 'main_prefecture');
         $counts = collect($prefectures)
             ->mapWithKeys(fn ($prefecture) => [$prefecture => (int) ($databaseCounts[$prefecture] ?? 0)]);
+        $sports = Job::publiclyVisible()->whereNotNull('sport')->pluck('sport')
+            ->merge(Organization::publiclyVisible()->whereNotNull('sport')->pluck('sport'))
+            ->filter()->unique()->sort()->values();
 
         return view('home', [
             'prefectures' => $prefectures,
@@ -30,6 +33,7 @@ class HomeController extends Controller
                 ['label' => '九州・沖縄', 'prefectures' => array_slice($prefectures, 39, 8)],
             ],
             'counts' => $counts,
+            'sports' => $sports,
             'coachTotal' => CoachProfile::publiclyVisible()->count(),
             'jobTotal' => Job::publiclyVisible()->count(),
             'organizationTotal' => Organization::publiclyVisible()->count(),

@@ -19,23 +19,35 @@ class InquiryController extends Controller
 
     public function create(Request $request)
     {
+        $mode = $request->get('mode') === 'mediated' ? 'mediated' : null;
         $coach = $request->filled('coach')
-            ? CoachProfile::publiclyVisible()->findOrFail($request->integer('coach'))
+            ? CoachProfile::publiclyVisible()->findOrFail((int) $request->input('coach'))
             : null;
-        abort_if($coach && !auth()->user()->isOrganization() && !auth()->user()->isAdmin(), 403);
+        abort_if($mode === 'mediated' && !auth()->user()->isOrganization() && !auth()->user()->isAdmin(), 403);
 
-        return view('inquiries.create', compact('coach'));
+        return view('inquiries.create', compact('coach', 'mode'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'coach_profile_id' => ['nullable', 'exists:coach_profiles,id'],
-            'category' => ['required', 'in:consultation,trouble,account,service,other'],
+            'category' => ['required', 'in:consultation,mediated_offer,trouble,account,service,other'],
             'subject' => ['required', 'max:255'],
             'body' => ['required', 'max:5000'],
         ]);
-        abort_if(!empty($data['coach_profile_id']) && !auth()->user()->isOrganization() && !auth()->user()->isAdmin(), 403);
+        abort_if(
+            $data['category'] === 'mediated_offer'
+            && !auth()->user()->isOrganization()
+            && !auth()->user()->isAdmin(),
+            403
+        );
+        if (!empty($data['coach_profile_id'])) {
+            abort_unless(
+                CoachProfile::publiclyVisible()->whereKey($data['coach_profile_id'])->exists(),
+                404
+            );
+        }
         $data['user_id'] = auth()->id();
         $data['status'] = 'open';
 

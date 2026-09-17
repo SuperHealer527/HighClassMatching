@@ -189,6 +189,16 @@ class DatabaseSeeder extends Seeder
 
         foreach ($coaches as $coach) {
             $user = User::where('email', $coach['email'])->first();
+            $coach['sports'] = array_slice($coach['sports'], 0, 1);
+            $coach['education_history'] = [$coach['degree']];
+            $coach['qualification_items'] = array_slice(preg_split('/[、,\r\n]+/u', $coach['qualifications'], -1, PREG_SPLIT_NO_EMPTY), 0, 2);
+            $coach['teaching_achievements'] = [$coach['achievements'], '地域チーム向けの専門講習と育成プログラムを継続して担当。'];
+            $coach['request_achievements'] = ['チームの課題分析と短期集中指導を担当。', '大会前のコンディション調整を支援。'];
+            $coach['recommendations'] = [
+                ['name' => '競技チーム所属選手', 'introduction' => '説明が具体的で、練習の目的を理解しながら取り組めました。'],
+                ['name' => '部活動キャプテン', 'introduction' => 'チームの課題を丁寧に見つけ、全員が実践できる方法を提案してくれます。'],
+            ];
+            $coach['direct_offer_enabled'] = true;
             CoachProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 array_merge($coach, [
@@ -229,6 +239,13 @@ class DatabaseSeeder extends Seeder
             CoachProfile::updateOrCreate(['user_id'=>$user->id], [
                 'name'=>$name,'kana'=>'こうにん しどうしゃ','roman_name'=>$roman,'birth_year'=>1980+($index%15),'affiliation'=>$prefecture.'スポーツサポート','main_prefecture'=>$prefecture,
                 'available_prefectures'=>$available,'area'=>$prefecture.'県内・オンライン','sports'=>[$sport],'fields'=>[$field],'degree'=>'スポーツ科学関連課程修了','qualifications'=>$qualification,
+                'education_history'=>['スポーツ科学関連課程修了'],'qualification_items'=>[$qualification],
+                'recommendations'=>[
+                    ['name'=>'地域クラブ所属選手','introduction'=>'技術だけでなく、選手自身が考えるための声かけを大切にしてくれる指導者です。'],
+                    ['name'=>'部活動顧問','introduction'=>'現場の状況に合わせて、無理なく継続できる練習計画を提案していただきました。'],
+                ],
+                'teaching_achievements'=>['学校部活動で年間指導プログラムを担当。','地域クラブで育成年代の専門指導を実施。'],
+                'request_achievements'=>['短期講習と大会前サポートを担当。','オンラインでの振り返り指導を実施。'],'direct_offer_enabled'=>($index % 5 !== 0),
                 'keywords'=>$sport.'、育成年代、チーム支援','target_ages'=>'小学生・中学生・高校生','target_levels'=>'初心者・部活動・大会出場','teaching_styles'=>'個人・チーム・オンライン',
                 'achievements'=>'学校部活動、地域クラブ、競技団体で継続的な指導実績があります。','request_history'=>'年間指導計画、短期講習、大会前サポートを担当。','message'=>$message,
                 'email'=>'coach'.($index+10).'@example.com','phone'=>'090-'.str_pad((string)(1200+$index),4,'0',STR_PAD_LEFT).'-'.str_pad((string)(5600+$index),4,'0',STR_PAD_LEFT),
@@ -509,7 +526,7 @@ class DatabaseSeeder extends Seeder
         ];
         foreach($articles as $index=>[$slug,$category,$title,$excerpt,$image]) Article::updateOrCreate(['slug'=>$slug],[
             'author_id'=>$admin->id,'title'=>$title,'category'=>$category,'excerpt'=>$excerpt,
-            'body'=>$excerpt."\n\n地域のスポーツ現場では、専門知識と同じくらい、選手・顧問・保護者の間で目的を共有することが大切です。まず現状を丁寧に確認し、無理なく続けられる小さな改善から始めます。\n\nHigh Class Matchingでは、指導者の資格、実績、対応地域を確認し、学校・団体の課題に合う出会いを支援しています。現場で得られた知見を継続的に発信し、より安全で豊かなスポーツ環境づくりにつなげます。",
+            'body'=>$excerpt."\n\n地域のスポーツ現場では、専門知識と同じくらい、選手・顧問・保護者の間で目的を共有することが大切です。まず現状を丁寧に確認し、無理なく続けられる小さな改善から始めます。\n\nBack Athlete Matchingでは、指導者の資格、実績、対応地域を確認し、チーム・部活の課題に合う出会いを支援しています。現場で得られた知見を継続的に発信し、より安全で豊かなスポーツ環境づくりにつなげます。",
             'cover_image_path'=>$image,'status'=>'published','published_at'=>now()->subDays($index*9+2),
         ]);
 

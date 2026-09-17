@@ -24,7 +24,7 @@ class OfferController extends Controller
     public function create(CoachProfile $coach)
     {
         $organization = auth()->user()->organization;
-        abort_unless(auth()->user()->isOrganization() && auth()->user()->isApproved() && $organization && $organization->isApproved() && $coach->isApproved(), 403);
+        abort_unless(auth()->user()->isOrganization() && auth()->user()->isApproved() && $organization && $organization->isApproved() && $coach->isApproved() && $coach->direct_offer_enabled, 403);
 
         return view('offers.create', [
             'coach' => $coach,
@@ -36,14 +36,17 @@ class OfferController extends Controller
     public function store(Request $request, CoachProfile $coach)
     {
         $organization = auth()->user()->organization;
-        abort_unless(auth()->user()->isOrganization() && auth()->user()->isApproved() && $organization && $organization->isApproved() && $coach->isApproved(), 403);
+        abort_unless(auth()->user()->isOrganization() && auth()->user()->isApproved() && $organization && $organization->isApproved() && $coach->isApproved() && $coach->direct_offer_enabled, 403);
         $data = $request->validate([
             'job_id' => ['nullable', 'exists:jobs,id'],
             'subject' => ['required', 'max:255'],
             'message' => ['required', 'max:5000'],
             'proposed_schedule' => ['nullable', 'max:255'],
         ]);
-        if (!empty($data['job_id'])) abort_unless($organization->jobs()->whereKey($data['job_id'])->exists(), 403);
+        if (!empty($data['job_id'])) {
+            $job = $organization->jobs()->whereKey($data['job_id'])->first();
+            abort_unless($job && $job->isPublished(), 403);
+        }
         $offer = $organization->offers()->create(array_merge($data, ['coach_profile_id' => $coach->id, 'status' => 'sent']));
         optional($coach->user)->notify(new MatchingActivityNotification('新しいオファー', $organization->name.'から「'.$offer->subject.'」が届きました。', '/offers'));
         return redirect()->route('offers.index')->with('status', '指導者へオファーを送信しました。');

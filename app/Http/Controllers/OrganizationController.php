@@ -9,12 +9,30 @@ use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Organization::publiclyVisible()->withCount([
+            'jobs' => fn ($jobQuery) => $jobQuery->where('status', 'published'),
+        ]);
+
+        if ($request->filled('prefecture')) {
+            $query->where('main_prefecture', $request->prefecture);
+        }
+        if ($request->filled('sport')) {
+            $query->where('sport', 'like', '%'.$request->sport.'%');
+        }
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($organizationQuery) use ($keyword) {
+                $organizationQuery->where('name', 'like', "%{$keyword}%")
+                    ->orWhere('area', 'like', "%{$keyword}%")
+                    ->orWhere('sport', 'like', "%{$keyword}%")
+                    ->orWhere('introduction', 'like', "%{$keyword}%");
+            });
+        }
+
         return view('organizations.index', [
-            'organizations' => Organization::publiclyVisible()->withCount([
-                'jobs' => fn ($query) => $query->where('status', 'published'),
-            ])->latest()->paginate(12),
+            'organizations' => $query->latest()->paginate(12)->withQueryString(),
         ]);
     }
 

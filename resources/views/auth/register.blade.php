@@ -8,7 +8,7 @@
         <label><span class="label">氏名/団体担当者名</span><input class="field" name="name" value="{{ old('name') }}" required></label>
         <label><span class="label">メールアドレス</span><input class="field" name="email" type="email" value="{{ old('email') }}" required></label>
     </div>
-    <label><span class="label">会員種別</span><select class="field" name="role"><option value="organization">閲覧会員・学校/団体</option><option value="coach">指導者会員</option></select></label>
+    <label><span class="label">会員種別</span><select class="field" name="role"><option value="organization" {{ old('role', 'organization') === 'organization' ? 'selected' : '' }}>閲覧会員・チーム・部活</option><option value="coach" {{ old('role') === 'coach' ? 'selected' : '' }}>指導者会員</option></select></label>
     <div class="grid2">
         <label><span class="label">パスワード</span><input class="field" name="password" type="password" required></label>
         <label><span class="label">パスワード確認</span><input class="field" name="password_confirmation" type="password" required></label>

@@ -39,6 +39,43 @@ class PhaseTwoWorkflowTest extends TestCase
         $this->assertDatabaseHas('notifications', ['notifiable_id' => $organizationUser->id]);
     }
 
+    public function test_coach_member_can_open_and_send_normal_coach_consultation(): void
+    {
+        [$coachUser, $coach] = $this->matchingUsers();
+
+        $this->actingAs($coachUser)->get(route('inquiries.create', ['coach' => $coach->id]))
+            ->assertOk()
+            ->assertSee($coach->name.'さんへの相談');
+
+        $this->actingAs($coachUser)->post(route('inquiries.store'), [
+            'coach_profile_id' => $coach->id,
+            'category' => 'consultation',
+            'subject' => '指導者への一般相談',
+            'body' => '指導内容について相談したいです。',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('inquiries', [
+            'user_id' => $coachUser->id,
+            'coach_profile_id' => $coach->id,
+            'category' => 'consultation',
+        ]);
+    }
+
+    public function test_coach_member_cannot_use_office_mediated_offer_mode(): void
+    {
+        [$coachUser, $coach] = $this->matchingUsers();
+
+        $this->actingAs($coachUser)->get(route('inquiries.create', ['coach' => $coach->id, 'mode' => 'mediated']))
+            ->assertForbidden();
+
+        $this->actingAs($coachUser)->post(route('inquiries.store'), [
+            'coach_profile_id' => $coach->id,
+            'category' => 'mediated_offer',
+            'subject' => '許可されない仲介依頼',
+            'body' => '仲介依頼です。',
+        ])->assertForbidden();
+    }
+
     public function test_application_changes_create_history_and_coach_can_withdraw(): void
     {
         [$coachUser, $coach, $organizationUser, $organization] = $this->matchingUsers();
@@ -61,7 +98,7 @@ class PhaseTwoWorkflowTest extends TestCase
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'withdrawn']);
     }
 
-    public function test_private_coach_fields_are_not_rendered_publicly(): void
+    public function test_birth_year_is_hidden_and_request_achievements_are_public(): void
     {
         [, $coach] = $this->matchingUsers();
         $coach->update([
@@ -74,7 +111,7 @@ class PhaseTwoWorkflowTest extends TestCase
         $this->get(route('coaches.show', $coach))
             ->assertOk()
             ->assertDontSee('1985年')
-            ->assertDontSee('非公開の依頼実績');
+            ->assertSee('非公開の依頼実績');
     }
 
     public function test_admin_can_export_csv_and_member_cannot(): void

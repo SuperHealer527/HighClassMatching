@@ -105,7 +105,7 @@ class JobController extends Controller
             'role_description' => ['nullable'],
             'detail' => ['nullable'],
             'notes' => ['nullable'],
-            'publish_end_at' => ['nullable', 'date'],
+            'publish_end_at' => ['nullable', 'date', 'after_or_equal:today'],
             'budget_note' => ['nullable', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -132,7 +132,7 @@ class JobController extends Controller
             'area' => ['nullable', 'max:255'], 'required_conditions' => ['nullable'], 'target_age' => ['nullable', 'max:255'],
             'gender' => ['nullable', 'max:50'], 'sport' => ['nullable', 'max:255'], 'request_frequency' => ['nullable', 'max:255'],
             'request_style' => ['nullable', 'max:255'], 'role_description' => ['nullable'], 'detail' => ['nullable'], 'notes' => ['nullable'],
-            'publish_end_at' => ['nullable', 'date'], 'budget_note' => ['nullable', 'max:255'],
+            'publish_end_at' => ['nullable', 'date', 'after_or_equal:today'], 'budget_note' => ['nullable', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
         if ($request->hasFile('image')) $data['image_path'] = $request->file('image')->store('job-images', 'public');

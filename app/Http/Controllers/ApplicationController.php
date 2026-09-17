@@ -55,7 +55,10 @@ class ApplicationController extends Controller
         $job = $application->job()->with('organization')->firstOrFail();
         $user = auth()->user();
 
-        $ownsJob = $user->isOrganization() && $job->organization->user_id === $user->id;
+        $ownsJob = $user->isOrganization()
+            && $user->isApproved()
+            && $job->organization->isApproved()
+            && $job->organization->user_id === $user->id;
         $ownsApplication = $user->isCoach() && $application->coachProfile->user_id === $user->id;
         abort_unless($user->isAdmin() || $ownsJob || $ownsApplication, 403);
 
@@ -71,6 +74,10 @@ class ApplicationController extends Controller
         $oldStatus = $application->status;
         if ($oldStatus === $data['status']) {
             return back()->with('status', '応募ステータスに変更はありません。');
+        }
+
+        if ($ownsJob) {
+            abort_unless(in_array($data['status'], $application->organizationTransitions(), true), 422, '現在の状態から選択した状態へは変更できません。');
         }
 
         $application->update(['status' => $data['status']]);

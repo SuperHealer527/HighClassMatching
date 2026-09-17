@@ -24,7 +24,7 @@ class MatchingService
 
     public function completeness(array $data): int
     {
-        $fields = ['name', 'kana', 'birth_year', 'affiliation', 'main_prefecture', 'sports', 'fields', 'degree', 'qualifications', 'keywords', 'achievements', 'desired_fee_range', 'message', 'photo_path'];
+        $fields = ['name', 'kana', 'affiliation', 'main_prefecture', 'sports', 'fields', 'education_history', 'qualification_items', 'keywords', 'teaching_achievements', 'request_achievements', 'desired_fee_range', 'message', 'photo_path'];
         $filled = collect($fields)->filter(fn ($field) => filled($data[$field] ?? null))->count();
         return (int) round(($filled / count($fields)) * 100);
     }

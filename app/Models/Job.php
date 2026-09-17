@@ -35,12 +35,22 @@ class Job extends Model
 
     public function isPublished(): bool
     {
-        return $this->status === 'published' && $this->organization && $this->organization->isApproved();
+        return $this->status === 'published'
+            && (!$this->publish_start_at || $this->publish_start_at->isToday() || $this->publish_start_at->isPast())
+            && (!$this->publish_end_at || $this->publish_end_at->isToday() || $this->publish_end_at->isFuture())
+            && $this->organization
+            && $this->organization->isApproved();
     }
 
     public function scopePubliclyVisible($query)
     {
         return $query->where('status', 'published')
+            ->where(function ($dateQuery) {
+                $dateQuery->whereNull('publish_start_at')->orWhereDate('publish_start_at', '<=', today());
+            })
+            ->where(function ($dateQuery) {
+                $dateQuery->whereNull('publish_end_at')->orWhereDate('publish_end_at', '>=', today());
+            })
             ->whereHas('organization', fn ($organization) => $organization->publiclyVisible());
     }
 }

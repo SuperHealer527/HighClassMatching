@@ -4,7 +4,7 @@ return [
     'email_notifications' => env('MATCHING_EMAIL_NOTIFICATIONS', false),
     'social_links' => [
         ['label' => 'Official Website', 'code' => 'WEB', 'url' => env('MATCHING_SOCIAL_WEBSITE', 'https://highclass-inc.com/')],
-        ['label' => 'LINE Official', 'code' => 'LINE', 'url' => env('MATCHING_SOCIAL_LINE', 'https://lin.ee/BSWbDgn')],
+        ['label' => 'LINE Official', 'code' => 'LINE', 'url' => env('MATCHING_SOCIAL_LINE', 'https://lin.ee/5nBDiI5')],
         ['label' => 'Instagram', 'code' => 'IG', 'url' => env('MATCHING_SOCIAL_INSTAGRAM')],
         ['label' => 'X', 'code' => 'X', 'url' => env('MATCHING_SOCIAL_X')],
         ['label' => 'YouTube', 'code' => 'YT', 'url' => env('MATCHING_SOCIAL_YOUTUBE')],
@@ -35,5 +35,5 @@ return [
         '徳島', '香川', '愛媛', '高知',
         '福岡', '佐賀', '長崎', '熊本', '大分', '宮崎', '鹿児島', '沖縄',
     ],
-    'fields' => ['競技指導', 'メンタル', 'トレーニング', 'リハビリ', '栄養', 'アナリスト'],
+    'fields' => ['競技指導', 'トレーニング', 'メディカル', 'リハビリ', '栄養', 'アナリスト', 'その他'],
 ];

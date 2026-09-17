@@ -13,7 +13,7 @@
 </head>
 <body>
 <header class="topbar">
-    <a class="brand" href="{{ route('home') }}"><small>一般社団法人 日本部活動指導研究協会</small>全国部活指導者マップ</a>
+    <a class="brand" href="{{ route('home') }}"><small>一般社団法人 日本部活動指導研究協会</small>スポーツ指導者・科学者マッチング</a>
     <nav class="nav">
         <a href="{{ route('coaches.index') }}">指導者を探す</a>
         <a href="{{ route('jobs.index') }}">案件を探す</a>

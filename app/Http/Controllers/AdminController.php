@@ -58,6 +58,10 @@ class AdminController extends Controller
     public function updateJobStatus(Request $request, Job $job)
     {
         $data = $request->validate(['status' => ['required', 'in:draft,pending_review,published,closed,suspended']]);
+        if ($data['status'] === 'published') {
+            abort_if($job->publish_end_at && $job->publish_end_at->isPast() && !$job->publish_end_at->isToday(), 422, '募集終了日を過ぎた案件は公開できません。');
+            abort_unless($job->organization && $job->organization->isApproved(), 422, '承認済みのチーム・部活に所属する案件のみ公開できます。');
+        }
         $job->update([
             'status' => $data['status'],
             'publish_start_at' => $data['status'] === 'published' ? ($job->publish_start_at ?: now()->toDateString()) : $job->publish_start_at,
@@ -98,7 +102,8 @@ class AdminController extends Controller
     }
     public function approveJob(Job $job)
     {
-        abort_unless($job->organization && $job->organization->isApproved(), 403);
+        abort_unless($job->organization && $job->organization->isApproved(), 422, '承認済みのチーム・部活に所属する案件のみ公開できます。');
+        abort_if($job->publish_end_at && $job->publish_end_at->isPast() && !$job->publish_end_at->isToday(), 422, '募集終了日を過ぎた案件は公開できません。');
 
         $job->update([
             'status' => 'published',

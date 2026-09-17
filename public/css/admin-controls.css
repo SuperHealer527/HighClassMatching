@@ -1,0 +1,97 @@
+:root {
+    --admin-control-bg: #0f172a;
+    --admin-control-border: rgba(255, 255, 255, .2);
+    --admin-control-focus: #60a5fa;
+}
+
+.form-control,
+.form-select {
+    min-height: 44px;
+    border: 1px solid var(--admin-control-border);
+    background-color: var(--admin-control-bg);
+    color: #f8fafc;
+    box-shadow: none;
+}
+
+.form-control::placeholder {
+    color: #8792a6;
+    opacity: 1;
+}
+
+.form-control:hover,
+.form-select:hover {
+    border-color: rgba(255, 255, 255, .38);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--admin-control-focus);
+    background-color: #111c31;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .2);
+}
+
+.form-select {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    padding-right: 42px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, #dbeafe 50%),
+        linear-gradient(135deg, #dbeafe 50%, transparent 50%);
+    background-position:
+        calc(100% - 19px) 50%,
+        calc(100% - 13px) 50%;
+    background-repeat: no-repeat;
+    background-size: 6px 6px, 6px 6px;
+}
+
+.form-select option {
+    background: #fff;
+    color: #111827;
+}
+
+.form-select-sm,
+.form-control-sm {
+    min-height: 36px;
+    font-size: .82rem;
+}
+
+.table .form-select {
+    width: auto;
+    min-width: 132px;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    border-color: rgba(255, 255, 255, .35);
+    background-color: #0f172a;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    border-color: #3b82f6;
+    background-color: #3b82f6;
+}
+
+.form-check-input:focus {
+    border-color: var(--admin-control-focus);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, .2);
+}
+
+.form-control:disabled,
+.form-select:disabled,
+.form-control[readonly] {
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, .08);
+    background-color: #111827;
+    color: #718096;
+    opacity: 1;
+}
+
+@media (max-width: 767px) {
+    .table .form-select {
+        min-width: 120px;
+    }
+}

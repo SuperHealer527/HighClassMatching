@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\CoachProfile;
-use App\Models\Job;
 use App\Models\User;
 use App\Notifications\MatchingActivityNotification;
 use App\Services\MatchingService;
@@ -66,13 +65,7 @@ class CoachController extends Controller
             abort(404);
         }
 
-        $relatedJobs = Job::with('organization')->publiclyVisible()
-            ->where(function ($query) use ($coach) {
-                $query->where('prefecture', $coach->main_prefecture);
-                foreach ((array) $coach->sports as $sport) $query->orWhere('sport', $sport);
-            })->latest('publish_start_at')->take(3)->get();
-
-        return view('coaches.show', compact('coach', 'relatedJobs'));
+        return view('coaches.show', compact('coach'));
     }
 
     public function create()
@@ -90,28 +83,39 @@ class CoachController extends Controller
     {
         abort_unless(auth()->user()->isCoach() || auth()->user()->isAdmin(), 403);
 
+        if (is_string($request->input('fields'))) {
+            $request->merge(['fields' => array_values(array_filter(array_map('trim', explode(',', $request->input('fields')))))]);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'kana' => ['nullable', 'max:255'],
             'roman_name' => ['nullable', 'max:255'],
-            'birth_year' => ['nullable', 'digits:4'],
             'affiliation' => ['nullable', 'max:255'],
             'main_prefecture' => ['required'],
             'area' => ['nullable', 'max:255'],
             'sports' => ['nullable', 'max:255'],
-            'fields' => ['nullable', 'max:255'],
-            'degree' => ['nullable', 'max:255'],
-            'qualifications' => ['nullable'],
+            'fields' => ['nullable', 'array', 'max:7'],
+            'fields.*' => ['in:'.implode(',', config('matching.fields'))],
+            'education_history' => ['nullable', 'array', 'max:3'],
+            'education_history.*' => ['nullable', 'max:255'],
+            'qualification_items' => ['nullable', 'array', 'max:2'],
+            'qualification_items.*' => ['nullable', 'max:255'],
+            'recommendations' => ['nullable', 'array', 'max:3'],
+            'recommendations.*.name' => ['nullable', 'max:255'],
+            'recommendations.*.introduction' => ['nullable', 'max:1000'],
+            'teaching_achievements' => ['nullable', 'array', 'max:3'],
+            'teaching_achievements.*' => ['nullable', 'max:255'],
+            'request_achievements' => ['nullable', 'array', 'max:3'],
+            'request_achievements.*' => ['nullable', 'max:255'],
+            'direct_offer_enabled' => ['nullable', 'boolean'],
             'keywords' => ['nullable'],
-            'achievements' => ['nullable'],
             'desired_fee_range' => ['nullable', 'max:255'],
             'message' => ['nullable'],
             'email' => ['nullable', 'email', 'not_regex:/[\r\n]/'],
             'phone' => ['nullable', 'max:50'],
             'available_prefectures' => ['nullable', 'array'],
             'available_prefectures.*' => ['in:'.implode(',', config('matching.prefectures'))],
-            'request_history' => ['nullable'],
-            'recommended_athlete' => ['nullable', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'identity_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             'qualification_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
@@ -128,13 +132,31 @@ class CoachController extends Controller
         if ($request->hasFile('identity_document') || $request->hasFile('qualification_document')) $data['verification_status'] = 'pending';
 
         $data['user_id'] = auth()->id();
-        $data['sports'] = array_filter(array_map('trim', explode(',', $data['sports'] ?? '')));
-        $data['fields'] = array_filter(array_map('trim', explode(',', $data['fields'] ?? '')));
+        $data['sports'] = filled($data['sports'] ?? null) ? [trim($data['sports'])] : [];
+        $data['fields'] = array_values(array_filter($data['fields'] ?? []));
+        foreach (['education_history', 'qualification_items', 'teaching_achievements', 'request_achievements'] as $field) {
+            $data[$field] = array_values(array_filter(array_map('trim', $data[$field] ?? [])));
+        }
+        $data['recommendations'] = collect($data['recommendations'] ?? [])->map(function ($recommendation) {
+            return [
+                'name' => trim($recommendation['name'] ?? ''),
+                'introduction' => trim($recommendation['introduction'] ?? ''),
+            ];
+        })->filter(fn ($recommendation) => filled($recommendation['name']) || filled($recommendation['introduction']))->values()->all();
+        $data['direct_offer_enabled'] = $request->has('direct_offer_enabled')
+            ? $request->boolean('direct_offer_enabled')
+            : ($existing ? $existing->direct_offer_enabled : true);
+        $data['degree'] = $data['education_history'][0] ?? null;
+        $data['qualifications'] = implode('、', $data['qualification_items']);
+        $data['achievements'] = implode("\n", $data['teaching_achievements']);
+        $data['request_history'] = implode("\n", $data['request_achievements']);
+        $data['recommended_athlete'] = $data['recommendations'][0]['name'] ?? null;
         $data['status'] = auth()->user()->isAdmin() ? 'approved' : 'pending';
         $data['profile_updated_at'] = now();
-        foreach (['show_birth_year', 'show_available_prefectures', 'show_request_history', 'show_recommended_athlete'] as $setting) {
-            $data[$setting] = $request->boolean($setting);
-        }
+        $data['show_birth_year'] = false;
+        $data['show_available_prefectures'] = true;
+        $data['show_request_history'] = true;
+        $data['show_recommended_athlete'] = true;
         $data['completeness_score'] = app(MatchingService::class)->completeness(array_merge(optional($existing)->toArray() ?? [], $data));
 
         $coach = CoachProfile::updateOrCreate(['user_id' => auth()->id()], $data);

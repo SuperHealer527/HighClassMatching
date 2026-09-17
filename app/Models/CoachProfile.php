@@ -18,6 +18,8 @@ class CoachProfile extends Model
         'desired_fee_range', 'message', 'email', 'phone', 'status', 'profile_updated_at',
         'show_birth_year', 'show_available_prefectures', 'show_request_history', 'show_recommended_athlete',
         'identity_document_path', 'qualification_document_path', 'verification_status', 'completeness_score',
+        'education_history', 'qualification_items', 'recommendations', 'teaching_achievements',
+        'request_achievements', 'direct_offer_enabled',
     ];
 
     protected $casts = [
@@ -31,6 +33,12 @@ class CoachProfile extends Model
         'show_request_history' => 'boolean',
         'show_recommended_athlete' => 'boolean',
         'completeness_score' => 'integer',
+        'education_history' => 'array',
+        'qualification_items' => 'array',
+        'recommendations' => 'array',
+        'teaching_achievements' => 'array',
+        'request_achievements' => 'array',
+        'direct_offer_enabled' => 'boolean',
     ];
 
     public function user()

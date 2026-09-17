@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\Article;
 use App\Models\CoachProfile;
 use App\Models\Job;
+use App\Models\MatchingMaster;
 use App\Models\Offer;
 use App\Models\Organization;
 use App\Models\User;
@@ -49,11 +50,81 @@ class ProductionWorkflowTest extends TestCase
         $this->assertDatabaseHas('reviews',['application_id'=>$application->id,'rating'=>5]);
     }
 
-    public function test_guest_sees_limited_profile_but_member_sees_full_profile(): void
+    public function test_disabled_direct_offer_uses_office_mediated_flow(): void
+    {
+        [, $coach, $organizationUser] = $this->records();
+        $coach->update(['direct_offer_enabled' => false]);
+
+        $this->actingAs($organizationUser)->get(route('offers.create', $coach))->assertForbidden();
+        $this->actingAs($organizationUser)->get(route('coaches.show', $coach))
+            ->assertOk()
+            ->assertDontSee('直接オファーする')
+            ->assertSee('事務局を通じてオファー');
+        $this->actingAs($organizationUser)->get(route('inquiries.create', ['coach' => $coach->id, 'mode' => 'mediated']))
+            ->assertOk()
+            ->assertSee('事務局仲介オファー');
+    }
+
+    public function test_coach_can_store_structured_profile_fields(): void
+    {
+        [$coachUser, $coach] = $this->records();
+
+        $this->actingAs($coachUser)->post(route('coaches.store'), [
+            'name' => $coach->name,
+            'main_prefecture' => '東京',
+            'available_prefectures' => ['東京', '神奈川'],
+            'sports' => 'バスケットボール',
+            'fields' => ['競技指導', 'トレーニング'],
+            'education_history' => ['体育大学卒業', 'スポーツ科学研究科修了'],
+            'qualification_items' => ['公認コーチ', 'CSCS'],
+            'recommendations' => [['name' => '山田選手', 'introduction' => '丁寧で実践的な指導です。']],
+            'teaching_achievements' => ['全国大会出場チームを指導'],
+            'request_achievements' => ['部活動の年間指導を担当'],
+            'direct_offer_enabled' => '0',
+        ])->assertRedirect('/dashboard');
+
+        $coach->refresh();
+        $this->assertSame(['体育大学卒業', 'スポーツ科学研究科修了'], $coach->education_history);
+        $this->assertSame(['公認コーチ', 'CSCS'], $coach->qualification_items);
+        $this->assertSame('山田選手', $coach->recommendations[0]['name']);
+        $this->assertFalse($coach->direct_offer_enabled);
+        $this->assertTrue($coach->show_available_prefectures);
+
+        $coachUser->unsetRelation('coachProfile');
+        $this->actingAs($coachUser)->get(route('coaches.create'))
+            ->assertOk()
+            ->assertSee('name="direct_offer_enabled" value="0" checked', false)
+            ->assertSee('name="available_prefectures[]"', false)
+            ->assertSee('name="fields[]"', false);
+    }
+
+    public function test_user_and_admin_selects_restore_current_values(): void
+    {
+        [, $coach, , , $job] = $this->records();
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'approved']);
+        $coach->update(['verification_status' => 'rejected']);
+        MatchingMaster::create(['type' => 'field', 'value' => '操作確認用', 'sort_order' => 999, 'is_active' => true]);
+
+        $this->get(route('jobs.index', ['prefecture' => '東京', 'sort' => 'deadline']))
+            ->assertOk()
+            ->assertSee('<option value="東京" selected>東京</option>', false)
+            ->assertSee('<option value="deadline" selected>締切順</option>', false)
+            ->assertSee($job->title);
+
+        $this->actingAs($admin)->get(route('admin.coaches.index'))
+            ->assertOk()
+            ->assertSee('<option value="rejected" selected>rejected</option>', false)
+            ->assertSee('css/admin-controls.css', false);
+        $this->actingAs($admin)->get(route('admin.masters.index'))
+            ->assertOk()
+            ->assertSee('name="is_active" value="1" checked', false);
+    }
+
+    public function test_guest_can_review_the_public_coach_profile(): void
     {
         [$coachUser,$coach]=$this->records();
         $coach->update(['achievements'=>'会員限定の指導実績']);
-        $this->get(route('coaches.show',$coach))->assertSee('MEMBERS ONLY')->assertDontSee('会員限定の指導実績');
+        $this->get(route('coaches.show',$coach))->assertSee('評価とメッセージ')->assertSee('会員限定の指導実績');
         $this->actingAs($coachUser)->get(route('coaches.show',$coach))->assertSee('会員限定の指導実績');
     }
 
@@ -134,6 +205,105 @@ class ProductionWorkflowTest extends TestCase
             'password_confirmation' => 'secure-password',
             'role' => 'coach',
         ])->assertSessionHasErrors('email');
+    }
+
+    public function test_header_service_title_links_to_home(): void
+    {
+        $this->get(route('coaches.index'))
+            ->assertOk()
+            ->assertSee('class="brand-service" href="'.route('home').'"', false)
+            ->assertSee('Back Athlete Matching');
+    }
+
+    public function test_hidden_coach_cannot_be_favorited_or_attached_to_an_inquiry(): void
+    {
+        [, $coach, $organizationUser] = $this->records();
+        $coach->update(['status' => 'suspended']);
+
+        $this->actingAs($organizationUser)
+            ->post(route('favorites.toggle', $coach))
+            ->assertForbidden();
+        $this->assertDatabaseMissing('coach_favorites', ['coach_profile_id' => $coach->id]);
+
+        $this->actingAs($organizationUser)->post(route('inquiries.store'), [
+            'coach_profile_id' => $coach->id,
+            'category' => 'consultation',
+            'subject' => '非公開プロフィールへの問い合わせ',
+            'body' => '送信されない問い合わせです。',
+        ])->assertNotFound();
+        $this->assertDatabaseMissing('inquiries', ['subject' => '非公開プロフィールへの問い合わせ']);
+    }
+
+    public function test_offer_cannot_reference_an_unpublished_job(): void
+    {
+        [, $coach, $organizationUser, , $job] = $this->records();
+        $job->update(['status' => 'closed']);
+
+        $this->actingAs($organizationUser)->post(route('offers.store', $coach), [
+            'job_id' => $job->id,
+            'subject' => '終了案件からのオファー',
+            'message' => '送信されないオファーです。',
+        ])->assertForbidden();
+        $this->assertDatabaseMissing('offers', ['subject' => '終了案件からのオファー']);
+    }
+
+    public function test_public_jobs_respect_their_publication_window(): void
+    {
+        [, , , , $job] = $this->records();
+        $job->update(['publish_end_at' => today()->subDay()]);
+
+        $this->get(route('jobs.index'))->assertDontSee($job->title);
+        $this->get(route('jobs.show', $job))->assertNotFound();
+
+        $job->update(['publish_start_at' => today()->addDay(), 'publish_end_at' => today()->addWeek()]);
+        $this->get(route('jobs.index'))->assertDontSee($job->title);
+        $this->get(route('jobs.show', $job))->assertNotFound();
+    }
+
+    public function test_organization_cannot_reopen_a_finished_application(): void
+    {
+        [, $coach, $organizationUser, , $job] = $this->records();
+        $application = Application::create([
+            'job_id' => $job->id,
+            'coach_profile_id' => $coach->id,
+            'status' => 'completed',
+        ]);
+
+        $this->actingAs($organizationUser)->patch(route('applications.update', $application), [
+            'status' => 'interview',
+        ])->assertStatus(422);
+        $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'completed']);
+    }
+
+    public function test_suspended_existing_session_cannot_access_member_or_admin_pages(): void
+    {
+        $member = User::factory()->create(['role' => 'coach', 'status' => 'suspended']);
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'suspended']);
+
+        $this->actingAs($member)->get(route('dashboard'))->assertForbidden();
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertForbidden();
+    }
+
+    public function test_all_admin_management_pages_render_in_the_admin_layout(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'approved']);
+        $pages = [
+            'admin.dashboard' => 'dashboard.admin',
+            'admin.users.index' => 'admin.users.index',
+            'admin.coaches.index' => 'admin.coaches.index',
+            'admin.organizations.index' => 'admin.organizations.index',
+            'admin.jobs.index' => 'admin.jobs.index',
+            'admin.applications.index' => 'admin.applications.index',
+            'admin.inquiries.index' => 'admin.inquiries.index',
+            'admin.offers.index' => 'admin.offers.index',
+            'admin.reviews.index' => 'admin.reviews.index',
+            'admin.articles.index' => 'admin.articles.index',
+            'admin.masters.index' => 'admin.masters.index',
+        ];
+
+        foreach ($pages as $route => $view) {
+            $this->actingAs($admin)->get(route($route))->assertOk()->assertViewIs($view);
+        }
     }
 
     private function records(): array

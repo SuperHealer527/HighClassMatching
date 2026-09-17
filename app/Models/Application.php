@@ -30,4 +30,20 @@ class Application extends Model
     }
 
     public function review() { return $this->hasOne(Review::class); }
+
+    public function organizationTransitions(): array
+    {
+        $transitions = [
+            'applied' => ['organization_review', 'interview', 'accepted', 'rejected', 'canceled'],
+            'organization_review' => ['interview', 'accepted', 'rejected', 'canceled'],
+            'interview' => ['accepted', 'rejected', 'canceled'],
+            'accepted' => ['completed', 'canceled'],
+            'rejected' => [],
+            'withdrawn' => [],
+            'completed' => [],
+            'canceled' => [],
+        ];
+
+        return $transitions[$this->status] ?? [];
+    }
 }
