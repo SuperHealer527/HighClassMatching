@@ -59,10 +59,8 @@
         <div class="footer-nav"><div><span>DISCOVER</span><a href="{{ route('coaches.index') }}">指導者を探す</a><a href="{{ route('jobs.index') }}">案件を探す</a><a href="{{ route('organizations.index') }}">チーム・部活を探す</a></div><div><span>SUPPORT</span><a href="{{ route('articles.index') }}">記事・インタビュー</a>@auth<a href="{{ route('inquiries.index') }}">お問い合わせ</a><a href="{{ route('dashboard') }}">マイページ</a>@else<a href="{{ route('login') }}">ログイン</a><a href="{{ route('register') }}">新規会員登録</a>@endauth</div></div>
         <div class="footer-company">
             <span>COMPANY</span>
-            <strong>株式会社ハイクラス</strong>
-            <p>代表取締役 位髙 駿夫<br>〒150-0002 東京都渋谷区渋谷1-20-26</p>
-            <p><a href="tel:0368224541">03-6822-4541</a><br>mail [@] highclass-inc.com</p>
-            <p>特定保健指導機関 1321800128</p>
+            <p>事務局：</p>
+            <strong>一般社団法人Back Athlete機構</strong>
             <nav class="footer-social" aria-label="公式サイト・SNS">
                 <span>FOLLOW / CONNECT</span>
                 @foreach(config('matching.social_links', []) as $social)

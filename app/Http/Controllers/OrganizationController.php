@@ -11,6 +11,13 @@ class OrganizationController extends Controller
 {
     public function index(Request $request)
     {
+        $sports = Organization::publiclyVisible()
+            ->whereNotNull('sport')
+            ->where('sport', '<>', '')
+            ->distinct()
+            ->orderBy('sport')
+            ->pluck('sport');
+
         $query = Organization::publiclyVisible()->withCount([
             'jobs' => fn ($jobQuery) => $jobQuery->where('status', 'published'),
         ]);
@@ -33,6 +40,8 @@ class OrganizationController extends Controller
 
         return view('organizations.index', [
             'organizations' => $query->latest()->paginate(12)->withQueryString(),
+            'prefectures' => config('matching.prefectures'),
+            'sports' => $sports,
         ]);
     }
 

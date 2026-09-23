@@ -215,6 +215,39 @@ class ProductionWorkflowTest extends TestCase
             ->assertSee('Back Athlete Matching');
     }
 
+    public function test_organization_directory_filters_by_prefecture_and_sport(): void
+    {
+        $tokyo = config('matching.prefectures')[12];
+        $osaka = config('matching.prefectures')[26];
+        $tokyoUser = User::factory()->create(['role' => 'organization', 'status' => 'approved']);
+        $osakaUser = User::factory()->create(['role' => 'organization', 'status' => 'approved']);
+
+        Organization::create([
+            'user_id' => $tokyoUser->id,
+            'name' => 'Tokyo Basketball Club',
+            'main_prefecture' => $tokyo,
+            'sport' => 'Basketball',
+            'status' => 'approved',
+        ]);
+        Organization::create([
+            'user_id' => $osakaUser->id,
+            'name' => 'Osaka Football Club',
+            'main_prefecture' => $osaka,
+            'sport' => 'Football',
+            'status' => 'approved',
+        ]);
+
+        $this->get(route('organizations.index', [
+            'prefecture' => $tokyo,
+            'sport' => 'Basketball',
+        ]))
+            ->assertOk()
+            ->assertSee('都道府県と競技から検索')
+            ->assertSee('Tokyo Basketball Club')
+            ->assertDontSee('Osaka Football Club')
+            ->assertViewHas('sports', fn ($sports) => $sports->contains('Basketball') && $sports->contains('Football'));
+    }
+
     public function test_hidden_coach_cannot_be_favorited_or_attached_to_an_inquiry(): void
     {
         [, $coach, $organizationUser] = $this->records();
