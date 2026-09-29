@@ -21,7 +21,7 @@
             <label><span class="label">件名</span><input class="field" name="subject" value="{{ old('subject','指導のご相談') }}" required></label>
             <label><span class="label">依頼内容</span><textarea class="field textarea" name="message" required placeholder="対象、競技、場所、頻度、依頼したい内容をご記入ください。">{{ old('message') }}</textarea></label>
             <label><span class="label">希望時期・日程</span><input class="field" name="proposed_schedule" value="{{ old('proposed_schedule') }}" placeholder="2026年10月から、毎週土曜日など"></label>
-            <div class="offer-assurance"><strong>安心してご相談ください</strong><p>送信時点で契約は成立しません。オファー受諾後に双方の登録連絡先が開示されます。</p></div>
+            <div class="offer-assurance"><strong>指導者本人と事務局へ通知します</strong><p>送信時点で契約は成立しません。内容は指導者本人と事務局へメール・サイト内通知で届き、オファー受諾後に双方の登録連絡先が開示されます。</p></div>
             <button class="btn offer-submit" type="submit">オファーを送信する <span>→</span></button>
         </form>
     </section>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CoachProfile;
 use App\Models\Offer;
+use App\Models\User;
 use App\Notifications\MatchingActivityNotification;
 use Illuminate\Http\Request;
 
@@ -48,8 +49,20 @@ class OfferController extends Controller
             abort_unless($job && $job->isPublished(), 403);
         }
         $offer = $organization->offers()->create(array_merge($data, ['coach_profile_id' => $coach->id, 'status' => 'sent']));
-        optional($coach->user)->notify(new MatchingActivityNotification('新しいオファー', $organization->name.'から「'.$offer->subject.'」が届きました。', '/offers'));
-        return redirect()->route('offers.index')->with('status', '指導者へオファーを送信しました。');
+        optional($coach->user)->notify(new MatchingActivityNotification(
+            '新しい直接オファー',
+            $organization->name.'から「'.$offer->subject.'」が届きました。',
+            '/offers',
+            true
+        ));
+        User::where('role', 'admin')->get()->each->notify(new MatchingActivityNotification(
+            '新しい直接オファー',
+            $organization->name.'から'.$coach->name.'さんへ「'.$offer->subject.'」が送信されました。',
+            '/admin/offers',
+            true
+        ));
+
+        return redirect()->route('offers.index')->with('status', '指導者本人と事務局へオファーを送信しました。');
     }
 
     public function update(Request $request, Offer $offer)

@@ -189,14 +189,16 @@ class DatabaseSeeder extends Seeder
 
         foreach ($coaches as $coach) {
             $user = User::where('email', $coach['email'])->first();
+            $coach['is_student'] = false;
             $coach['sports'] = array_slice($coach['sports'], 0, 1);
             $coach['education_history'] = [$coach['degree']];
             $coach['qualification_items'] = array_slice(preg_split('/[、,\r\n]+/u', $coach['qualifications'], -1, PREG_SPLIT_NO_EMPTY), 0, 2);
             $coach['teaching_achievements'] = [$coach['achievements'], '地域チーム向けの専門講習と育成プログラムを継続して担当。'];
             $coach['request_achievements'] = ['チームの課題分析と短期集中指導を担当。', '大会前のコンディション調整を支援。'];
             $coach['recommendations'] = [
-                ['name' => '競技チーム所属選手', 'introduction' => '説明が具体的で、練習の目的を理解しながら取り組めました。'],
-                ['name' => '部活動キャプテン', 'introduction' => 'チームの課題を丁寧に見つけ、全員が実践できる方法を提案してくれます。'],
+                ['name' => '競技チーム所属選手', 'introduction' => '説明が具体的で、練習の目的を理解しながら取り組めました。', 'image_path' => 'images/school-team-practice-color.png'],
+                ['name' => '部活動キャプテン', 'introduction' => 'チームの課題を丁寧に見つけ、全員が実践できる方法を提案してくれます。', 'image_path' => 'images/sports-coaching-hero-color.png'],
+                ['name' => '地域クラブ選手', 'introduction' => '競技レベルに合わせた助言が分かりやすく、次の練習で実践できる内容でした。', 'image_path' => 'images/sports-analysis-interview.png'],
             ];
             $coach['direct_offer_enabled'] = true;
             CoachProfile::updateOrCreate(
@@ -235,14 +237,16 @@ class DatabaseSeeder extends Seeder
             ['橋本 梨沙','Risa Hashimoto','鹿児島',['鹿児島','宮崎','熊本'],'バレーボール','トレーニング','健康運動指導士','少人数でも継続できる体力づくりを提案します。'],
         ];
         foreach ($additionalCoaches as $index => [$name,$roman,$prefecture,$available,$sport,$field,$qualification,$message]) {
+            $isStudent = in_array($index, [1, 6, 13], true);
             $user = User::updateOrCreate(['email' => 'coach'.($index+10).'@example.com'], ['name'=>$name,'password'=>Hash::make('password'),'role'=>'coach','member_type'=>'coach_member','status'=>'approved']);
             CoachProfile::updateOrCreate(['user_id'=>$user->id], [
-                'name'=>$name,'kana'=>'こうにん しどうしゃ','roman_name'=>$roman,'birth_year'=>1980+($index%15),'affiliation'=>$prefecture.'スポーツサポート','main_prefecture'=>$prefecture,
+                'name'=>$name,'kana'=>'こうにん しどうしゃ','roman_name'=>$roman,'birth_year'=>$isStudent ? 2001+($index%3) : 1980+($index%15),'is_student'=>$isStudent,'affiliation'=>$prefecture.'スポーツサポート','main_prefecture'=>$prefecture,
                 'available_prefectures'=>$available,'area'=>$prefecture.'県内・オンライン','sports'=>[$sport],'fields'=>[$field],'degree'=>'スポーツ科学関連課程修了','qualifications'=>$qualification,
                 'education_history'=>['スポーツ科学関連課程修了'],'qualification_items'=>[$qualification],
                 'recommendations'=>[
-                    ['name'=>'地域クラブ所属選手','introduction'=>'技術だけでなく、選手自身が考えるための声かけを大切にしてくれる指導者です。'],
-                    ['name'=>'部活動顧問','introduction'=>'現場の状況に合わせて、無理なく継続できる練習計画を提案していただきました。'],
+                    ['name'=>'地域クラブ所属選手','introduction'=>'技術だけでなく、選手自身が考えるための声かけを大切にしてくれる指導者です。','image_path'=>'images/school-team-practice-color.png'],
+                    ['name'=>'部活動顧問','introduction'=>'現場の状況に合わせて、無理なく継続できる練習計画を提案していただきました。','image_path'=>'images/sports-coaching-hero-color.png'],
+                    ['name'=>'育成チーム選手','introduction'=>'課題を明確にし、毎回の練習で成長を確認できる具体的なアドバイスをいただきました。','image_path'=>'images/sports-analysis-interview.png'],
                 ],
                 'teaching_achievements'=>['学校部活動で年間指導プログラムを担当。','地域クラブで育成年代の専門指導を実施。'],
                 'request_achievements'=>['短期講習と大会前サポートを担当。','オンラインでの振り返り指導を実施。'],'direct_offer_enabled'=>($index % 5 !== 0),

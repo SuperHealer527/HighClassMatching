@@ -19,7 +19,7 @@ class AdminExportController extends Controller
     {
         $exports = [
             'users' => [['ID', '名前', 'メール', 'ロール', '状態', '登録日'], User::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->email, $v->role, $v->status, $v->created_at])],
-            'coaches' => [['ID', '名前', '都道府県', '競技', '指導分野', '状態'], CoachProfile::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->main_prefecture, implode('/', $v->sports ?? []), implode('/', $v->fields ?? []), $v->status])],
+            'coaches' => [['ID', '名前', '都道府県', '区分', '競技', '指導分野', '状態'], CoachProfile::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->main_prefecture, $v->is_student ? '学生' : '一般', implode('/', $v->sports ?? []), implode('/', $v->fields ?? []), $v->status])],
             'organizations' => [['ID', '団体名', '都道府県', '競技', '状態'], Organization::latest()->get()->map(fn ($v) => [$v->id, $v->name, $v->main_prefecture, $v->sport, $v->status])],
             'jobs' => [['ID', '案件名', '団体ID', '都道府県', '競技', '状態'], Job::latest()->get()->map(fn ($v) => [$v->id, $v->title, $v->organization_id, $v->prefecture, $v->sport, $v->status])],
             'applications' => [['ID', '案件ID', '指導者ID', '状態', '応募日'], Application::latest()->get()->map(fn ($v) => [$v->id, $v->job_id, $v->coach_profile_id, $v->status, $v->created_at])],

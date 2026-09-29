@@ -10,9 +10,11 @@ use App\Models\MatchingMaster;
 use App\Models\Offer;
 use App\Models\Organization;
 use App\Models\User;
+use App\Notifications\MatchingActivityNotification;
 use App\Services\MatchingService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -22,7 +24,9 @@ class ProductionWorkflowTest extends TestCase
 
     public function test_organization_can_save_and_offer_coach_then_coach_accepts(): void
     {
+        Notification::fake();
         [$coachUser,$coach,$organizationUser,$organization,$job]=$this->records();
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'approved']);
         $this->actingAs($organizationUser)->post(route('favorites.toggle',$coach))->assertRedirect();
         $this->assertDatabaseHas('coach_favorites',['organization_id'=>$organization->id,'coach_profile_id'=>$coach->id]);
 
@@ -35,6 +39,16 @@ class ProductionWorkflowTest extends TestCase
             'job_id'=>$job->id,'subject'=>'秋季指導のご相談','message'=>'週1回の指導をお願いします。','proposed_schedule'=>'10月から',
         ])->assertRedirect(route('offers.index'));
         $offer=Offer::where('subject','秋季指導のご相談')->firstOrFail();
+        Notification::assertSentTo($coachUser, MatchingActivityNotification::class, function ($notification) use ($coachUser) {
+            return $notification->title === '新しい直接オファー'
+                && $notification->forceMail
+                && in_array('mail', $notification->via($coachUser), true);
+        });
+        Notification::assertSentTo($admin, MatchingActivityNotification::class, function ($notification) use ($admin) {
+            return $notification->title === '新しい直接オファー'
+                && $notification->forceMail
+                && in_array('mail', $notification->via($admin), true);
+        });
         $this->actingAs($coachUser)->patch(route('offers.update',$offer),['status'=>'accepted'])->assertRedirect();
         $this->assertDatabaseHas('offers',['id'=>$offer->id,'status'=>'accepted']);
         $this->actingAs($coachUser)->get(route('offers.index'))->assertSee($organization->manager_email);
@@ -52,21 +66,36 @@ class ProductionWorkflowTest extends TestCase
 
     public function test_disabled_direct_offer_uses_office_mediated_flow(): void
     {
-        [, $coach, $organizationUser] = $this->records();
+        Notification::fake();
+        [$coachUser, $coach, $organizationUser] = $this->records();
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'approved']);
         $coach->update(['direct_offer_enabled' => false]);
 
         $this->actingAs($organizationUser)->get(route('offers.create', $coach))->assertForbidden();
         $this->actingAs($organizationUser)->get(route('coaches.show', $coach))
             ->assertOk()
             ->assertDontSee('直接オファーする')
-            ->assertSee('事務局を通じてオファー');
+            ->assertSee('事務局へ相談');
         $this->actingAs($organizationUser)->get(route('inquiries.create', ['coach' => $coach->id, 'mode' => 'mediated']))
             ->assertOk()
-            ->assertSee('事務局仲介オファー');
+            ->assertSee('事務局へ相談');
+        $this->actingAs($organizationUser)->post(route('inquiries.store'), [
+            'coach_profile_id' => $coach->id,
+            'category' => 'mediated_offer',
+            'subject' => '事務局への指導相談',
+            'body' => '条件整理と指導者への確認をお願いします。',
+        ])->assertRedirect();
+        Notification::assertSentTo($admin, MatchingActivityNotification::class, function ($notification) use ($admin) {
+            return $notification->title === '指導者についての事務局相談'
+                && $notification->forceMail
+                && in_array('mail', $notification->via($admin), true);
+        });
+        Notification::assertNotSentTo($coachUser, MatchingActivityNotification::class);
     }
 
     public function test_coach_can_store_structured_profile_fields(): void
     {
+        Storage::fake('public');
         [$coachUser, $coach] = $this->records();
 
         $this->actingAs($coachUser)->post(route('coaches.store'), [
@@ -77,25 +106,81 @@ class ProductionWorkflowTest extends TestCase
             'fields' => ['競技指導', 'トレーニング'],
             'education_history' => ['体育大学卒業', 'スポーツ科学研究科修了'],
             'qualification_items' => ['公認コーチ', 'CSCS'],
-            'recommendations' => [['name' => '山田選手', 'introduction' => '丁寧で実践的な指導です。']],
+            'recommendations' => [[
+                'name' => '山田選手',
+                'introduction' => '丁寧で実践的な指導です。',
+                'image' => UploadedFile::fake()->image('recommendation.jpg', 800, 500),
+            ]],
             'teaching_achievements' => ['全国大会出場チームを指導'],
             'request_achievements' => ['部活動の年間指導を担当'],
             'direct_offer_enabled' => '0',
+            'is_student' => '1',
+            'message' => '競技経験と専門知識を生かし、選手に寄り添う指導を行います。',
         ])->assertRedirect('/dashboard');
 
         $coach->refresh();
         $this->assertSame(['体育大学卒業', 'スポーツ科学研究科修了'], $coach->education_history);
         $this->assertSame(['公認コーチ', 'CSCS'], $coach->qualification_items);
         $this->assertSame('山田選手', $coach->recommendations[0]['name']);
+        $this->assertNotEmpty($coach->recommendations[0]['image_path']);
+        Storage::disk('public')->assertExists($coach->recommendations[0]['image_path']);
         $this->assertFalse($coach->direct_offer_enabled);
+        $this->assertTrue($coach->is_student);
         $this->assertTrue($coach->show_available_prefectures);
 
         $coachUser->unsetRelation('coachProfile');
         $this->actingAs($coachUser)->get(route('coaches.create'))
             ->assertOk()
             ->assertSee('name="direct_offer_enabled" value="0" checked', false)
+            ->assertSee('name="is_student" value="1" checked', false)
+            ->assertSee('maxlength="80"', false)
+            ->assertSee('maxlength="200"', false)
+            ->assertSee('name="recommendations[0][image]"', false)
             ->assertSee('name="available_prefectures[]"', false)
             ->assertSee('name="fields[]"', false);
+    }
+
+    public function test_student_coaches_can_be_marked_and_filtered(): void
+    {
+        [, $generalCoach] = $this->records();
+        $studentUser = User::factory()->create(['role' => 'coach', 'status' => 'approved']);
+        $studentCoach = CoachProfile::create([
+            'user_id' => $studentUser->id,
+            'name' => '学生指導者テスト',
+            'main_prefecture' => '神奈川',
+            'sports' => ['陸上競技'],
+            'fields' => ['トレーニング', 'リハビリ'],
+            'message' => '学生スポーツの経験を生かした指導を行います。',
+            'is_student' => true,
+            'status' => 'approved',
+            'verification_status' => 'verified',
+        ]);
+
+        $this->get(route('coaches.index', ['student' => 1]))
+            ->assertOk()
+            ->assertSee($studentCoach->name)
+            ->assertDontSee($generalCoach->name)
+            ->assertSee('class="student-badge">学生', false)
+            ->assertSee('coach-card-image', false)
+            ->assertSee('トレーニング')
+            ->assertSee('リハビリ');
+
+        $this->get(route('coaches.show', $studentCoach))
+            ->assertOk()
+            ->assertSee('登録区分')
+            ->assertSee('学生');
+
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'approved']);
+        $this->actingAs($admin)->get(route('admin.coaches.index', ['student' => '1']))
+            ->assertOk()
+            ->assertSee($studentCoach->name)
+            ->assertDontSee($generalCoach->name);
+
+        $this->actingAs($studentUser)->post(route('coaches.store'), [
+            'name' => $studentCoach->name,
+            'main_prefecture' => '神奈川',
+            'message' => str_repeat('あ', 81),
+        ])->assertSessionHasErrors('message');
     }
 
     public function test_user_and_admin_selects_restore_current_values(): void
@@ -124,7 +209,10 @@ class ProductionWorkflowTest extends TestCase
     {
         [$coachUser,$coach]=$this->records();
         $coach->update(['achievements'=>'会員限定の指導実績']);
-        $this->get(route('coaches.show',$coach))->assertSee('評価とメッセージ')->assertSee('会員限定の指導実績');
+        $this->get(route('coaches.show',$coach))
+            ->assertSee('評価とメッセージ')
+            ->assertSee('会員限定の指導実績')
+            ->assertSeeInOrder(['指導実績', '評価とメッセージ', 'オファー可能なご依頼について']);
         $this->actingAs($coachUser)->get(route('coaches.show',$coach))->assertSee('会員限定の指導実績');
     }
 

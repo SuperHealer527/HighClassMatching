@@ -1736,7 +1736,7 @@ input[type="radio"] {
 }
 
 .coach-results {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .result-card {
@@ -3986,6 +3986,216 @@ nav[role="navigation"] {
     }
 }
 
+/* Coach directory refinement: landscape profiles and student discovery. */
+.coach-results {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.coach-card .result-image.coach-card-image {
+    height: auto;
+    aspect-ratio: 16 / 10;
+}
+
+.coach-card .result-image.coach-card-image img {
+    object-position: center 24%;
+}
+
+.coach-card .result-card-body {
+    padding: 20px 20px 0;
+}
+
+.coach-card-tags {
+    display: flex;
+    min-height: 28px;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.coach-card-tags > div {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.coach-card-tags .badge {
+    margin: 0;
+    font-size: 10px;
+}
+
+.student-badge {
+    display: inline-flex;
+    min-height: 27px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    color: #111;
+    background: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: .08em;
+}
+
+.student-badge::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.coach-card .rating {
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+
+.coach-card-message {
+    min-height: 66px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.coach-card .entity-card-link {
+    margin-bottom: -12px;
+}
+
+.coach-filter-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+}
+
+.student-profile-toggle {
+    position: relative;
+    display: block;
+    margin: 22px 0 0;
+    cursor: pointer;
+}
+
+.student-profile-toggle input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.student-profile-toggle > span {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 15px 18px;
+    border: 1px solid #d6d6d2;
+    background: #fafaf8;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.student-profile-toggle strong {
+    color: #111;
+    font-size: 14px;
+}
+
+.student-profile-toggle small {
+    color: #777;
+    font-size: 11px;
+}
+
+.student-profile-toggle:hover > span {
+    border-color: #111;
+    transform: translateY(-2px);
+}
+
+.student-profile-toggle input:checked + span {
+    border-color: var(--accent);
+    background: #fff4ee;
+    box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.student-profile-toggle input:focus-visible + span {
+    outline: 3px solid rgba(251, 86, 1, .24);
+    outline-offset: 2px;
+}
+
+.compact-profile-message {
+    min-height: 120px;
+}
+
+.profile-input-note {
+    display: block;
+    margin-top: 8px;
+    color: #777;
+    font-size: 11px;
+}
+
+.profile-detail-hero.compact-profile-hero {
+    height: clamp(500px, 39vw, 580px);
+    min-height: 480px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(390px, .65fr);
+}
+
+.profile-detail-hero.compact-profile-hero .detail-hero-media img {
+    height: 100%;
+    min-height: 0;
+    object-position: center 24%;
+}
+
+.profile-detail-hero .detail-badges .student-badge {
+    color: #fff;
+    background: transparent;
+}
+
+@media (max-width: 1180px) {
+    .coach-results {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .coach-results {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .profile-detail-hero.compact-profile-hero {
+        height: auto;
+        min-height: 0;
+        grid-template-columns: 1fr;
+    }
+
+    .profile-detail-hero.compact-profile-hero .detail-hero-media,
+    .profile-detail-hero.compact-profile-hero .detail-hero-media img {
+        min-height: 0;
+        aspect-ratio: 16 / 10;
+    }
+}
+
+@media (max-width: 600px) {
+    .coach-results {
+        grid-template-columns: 1fr;
+    }
+
+    .coach-filter-checks {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .student-profile-toggle > span {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
 /* Offer composer and support detail */
 .offer-page-heading p,
 .support-page-heading p {
@@ -4947,7 +5157,7 @@ a:active {
 .coach-card .result-card-body,
 .job-card .result-card-body {
     min-height: 0;
-    padding-top: 21px;
+    padding: 12px;
 }
 
 .coach-card .result-card-body h2,
@@ -4971,7 +5181,8 @@ a:active {
 .job-card .result-card-body>p:not(.meta),
 .organization-card .result-card-body>p:not(.meta) {
     color: #555;
-    line-height: 1.85;
+    line-height: 1.5;
+    font-size: 12px;
 }
 
 .entity-owner {
@@ -5858,6 +6069,15 @@ a:active {
     letter-spacing: .12em;
 }
 
+.recommendation-form-preview {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    margin-bottom: 16px;
+    border: 1px solid #d9d9d5;
+    object-fit: cover;
+}
+
 .recommendation-form-item label + label {
     margin-top: 12px;
 }
@@ -6000,11 +6220,30 @@ a:active {
 
 .recommendation-card {
     min-height: 190px;
-    padding: 26px;
+    overflow: hidden;
     border: 1px solid #d8d8d4;
     border-top: 3px solid #fb5601;
     background: #fff;
     transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.recommendation-card-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform .55s cubic-bezier(.2, .8, .2, 1), filter .35s ease;
+}
+
+.recommendation-card:hover .recommendation-card-image {
+    transform: scale(1.035);
+    filter: saturate(1.08) contrast(1.03);
+}
+
+.recommendation-card-body {
+    position: relative;
+    padding: 24px 26px 28px;
+    background: #fff;
 }
 
 .recommendation-card:hover {
@@ -6012,7 +6251,7 @@ a:active {
     box-shadow: 0 18px 40px rgba(0, 0, 0, .09);
 }
 
-.recommendation-card > span,
+.recommendation-card-body > span,
 .coach-message-block > span,
 .profile-keywords > span {
     color: #fb5601;
@@ -6022,7 +6261,7 @@ a:active {
 }
 
 .recommendation-card h3 {
-    margin: 16px 0 12px;
+    margin: 12px 0 10px;
     font-size: 17px;
 }
 
@@ -6068,6 +6307,24 @@ a:active {
     margin: 0;
     color: #555;
     font-size: 13px;
+}
+
+.profile-records-panel {
+    margin: -22px 0 64px;
+    padding: 34px 38px 28px;
+    border: 1px solid #d6d6d2;
+    border-top: 3px solid #111;
+    background: #fafaf8;
+}
+
+.profile-records-panel .achievement-columns {
+    margin-top: 0;
+}
+
+.profile-records-panel .profile-keywords {
+    margin: 28px 0 0;
+    padding-top: 22px;
+    border-top: 1px solid #ddd;
 }
 
 .achievement-columns {
@@ -6186,6 +6443,7 @@ a:active {
     .coach-basic-grid > div { grid-template-columns: 104px 1fr; }
     .offer-condition { grid-template-columns: 1fr; gap: 8px; }
     .profile-keywords { align-items: flex-start; flex-direction: column; gap: 8px; }
+    .profile-records-panel { margin-top: -12px; padding: 26px 20px 22px; }
     .profile-bottom-offer { padding: 30px 22px; }
     .profile-form-submit { padding: 20px 18px; }
     .profile-form-submit .btn { width: 100%; min-width: 0; }

@@ -16,17 +16,20 @@ class MatchingActivityNotification extends Notification
 
     public string $url;
 
-    public function __construct(string $title, string $message, string $url = '/dashboard')
+    public bool $forceMail;
+
+    public function __construct(string $title, string $message, string $url = '/dashboard', bool $forceMail = false)
     {
         $this->title = $title;
         $this->message = $message;
         $this->url = $url;
+        $this->forceMail = $forceMail;
     }
 
     public function via($notifiable)
     {
         $channels = ['database'];
-        if (config('matching.email_notifications')) {
+        if ($this->forceMail || config('matching.email_notifications')) {
             $channels[] = 'mail';
         }
 

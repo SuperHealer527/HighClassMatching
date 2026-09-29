@@ -52,10 +52,12 @@ class InquiryController extends Controller
         $data['status'] = 'open';
 
         $inquiry = Inquiry::create($data);
+        $forceOfficeMail = in_array($inquiry->category, ['mediated_offer', 'consultation'], true);
         User::where('role', 'admin')->get()->each->notify(new MatchingActivityNotification(
-            '新しい問い合わせ',
+            $forceOfficeMail ? '指導者についての事務局相談' : '新しい問い合わせ',
             auth()->user()->name.' 様から「'.$inquiry->subject.'」を受け付けました。',
-            '/admin/inquiries/'.$inquiry->id
+            '/admin/inquiries/'.$inquiry->id,
+            $forceOfficeMail
         ));
 
         return redirect()->route('inquiries.show', $inquiry)->with('status', '問い合わせを送信しました。');

@@ -21,6 +21,10 @@ class AdminManagementController extends Controller
             $query->where('status', $request->status);
         }
 
+        if (in_array($request->student, ['0', '1'], true)) {
+            $query->where('is_student', $request->student === '1');
+        }
+
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {

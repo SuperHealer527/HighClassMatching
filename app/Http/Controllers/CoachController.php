@@ -40,6 +40,7 @@ class CoachController extends Controller
         }
         if ($request->filled('sport')) $query->where('sports', 'like', '%'.$request->sport.'%');
         if ($request->boolean('verified')) $query->where('verification_status', 'verified');
+        if ($request->boolean('student')) $query->where('is_student', true);
         switch ($request->get('sort')) {
             case 'rating':
                 $query->orderByDesc('reviews_avg_rating');
@@ -103,15 +104,17 @@ class CoachController extends Controller
             'qualification_items.*' => ['nullable', 'max:255'],
             'recommendations' => ['nullable', 'array', 'max:3'],
             'recommendations.*.name' => ['nullable', 'max:255'],
-            'recommendations.*.introduction' => ['nullable', 'max:1000'],
+            'recommendations.*.introduction' => ['nullable', 'string', 'max:200'],
+            'recommendations.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'teaching_achievements' => ['nullable', 'array', 'max:3'],
             'teaching_achievements.*' => ['nullable', 'max:255'],
             'request_achievements' => ['nullable', 'array', 'max:3'],
             'request_achievements.*' => ['nullable', 'max:255'],
             'direct_offer_enabled' => ['nullable', 'boolean'],
+            'is_student' => ['nullable', 'boolean'],
             'keywords' => ['nullable'],
             'desired_fee_range' => ['nullable', 'max:255'],
-            'message' => ['nullable'],
+            'message' => ['nullable', 'string', 'max:80'],
             'email' => ['nullable', 'email', 'not_regex:/[\r\n]/'],
             'phone' => ['nullable', 'max:50'],
             'available_prefectures' => ['nullable', 'array'],
@@ -137,15 +140,24 @@ class CoachController extends Controller
         foreach (['education_history', 'qualification_items', 'teaching_achievements', 'request_achievements'] as $field) {
             $data[$field] = array_values(array_filter(array_map('trim', $data[$field] ?? [])));
         }
-        $data['recommendations'] = collect($data['recommendations'] ?? [])->map(function ($recommendation) {
+        $existingRecommendations = collect($existing ? ($existing->recommendations ?: []) : [])->values();
+        $data['recommendations'] = collect($data['recommendations'] ?? [])->map(function ($recommendation, $index) use ($request, $existingRecommendations) {
+            $existingRecommendation = $existingRecommendations->get($index, []);
+            $imagePath = $existingRecommendation['image_path'] ?? null;
+            if ($request->hasFile('recommendations.'.$index.'.image')) {
+                $imagePath = $request->file('recommendations.'.$index.'.image')->store('recommendation-images', 'public');
+            }
+
             return [
                 'name' => trim($recommendation['name'] ?? ''),
                 'introduction' => trim($recommendation['introduction'] ?? ''),
+                'image_path' => $imagePath,
             ];
-        })->filter(fn ($recommendation) => filled($recommendation['name']) || filled($recommendation['introduction']))->values()->all();
+        })->filter(fn ($recommendation) => filled($recommendation['name']) || filled($recommendation['introduction']) || filled($recommendation['image_path']))->values()->all();
         $data['direct_offer_enabled'] = $request->has('direct_offer_enabled')
             ? $request->boolean('direct_offer_enabled')
             : ($existing ? $existing->direct_offer_enabled : true);
+        $data['is_student'] = $request->boolean('is_student');
         $data['degree'] = $data['education_history'][0] ?? null;
         $data['qualifications'] = implode('、', $data['qualification_items']);
         $data['achievements'] = implode("\n", $data['teaching_achievements']);
