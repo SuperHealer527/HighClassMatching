@@ -87,19 +87,26 @@ class CoachController extends Controller
         if (is_string($request->input('fields'))) {
             $request->merge(['fields' => array_values(array_filter(array_map('trim', explode(',', $request->input('fields')))))]);
         }
+        if (is_string($request->input('sports'))) {
+            $request->merge(['sports' => array_values(array_filter([trim($request->input('sports'))]))]);
+        }
 
         $data = $request->validate([
             'name' => ['required', 'max:255'],
             'kana' => ['nullable', 'max:255'],
             'roman_name' => ['nullable', 'max:255'],
             'affiliation' => ['nullable', 'max:255'],
+            'other_affiliations' => ['nullable', 'array', 'max:3'],
+            'other_affiliations.*' => ['nullable', 'max:255'],
             'main_prefecture' => ['required'],
             'area' => ['nullable', 'max:255'],
-            'sports' => ['nullable', 'max:255'],
-            'fields' => ['nullable', 'array', 'max:7'],
+            'sports' => ['nullable', 'array', 'max:3'],
+            'sports.*' => ['nullable', 'max:255'],
+            'fields' => ['nullable', 'array', 'max:1'],
             'fields.*' => ['in:'.implode(',', config('matching.fields'))],
             'education_history' => ['nullable', 'array', 'max:3'],
             'education_history.*' => ['nullable', 'max:255'],
+            'degree' => ['nullable', 'string', 'max:255'],
             'qualification_items' => ['nullable', 'array', 'max:2'],
             'qualification_items.*' => ['nullable', 'max:255'],
             'recommendations' => ['nullable', 'array', 'max:3'],
@@ -114,7 +121,7 @@ class CoachController extends Controller
             'is_student' => ['nullable', 'boolean'],
             'keywords' => ['nullable'],
             'desired_fee_range' => ['nullable', 'max:255'],
-            'message' => ['nullable', 'string', 'max:80'],
+            'message' => ['nullable', 'string', 'max:150'],
             'email' => ['nullable', 'email', 'not_regex:/[\r\n]/'],
             'phone' => ['nullable', 'max:50'],
             'available_prefectures' => ['nullable', 'array'],
@@ -135,9 +142,9 @@ class CoachController extends Controller
         if ($request->hasFile('identity_document') || $request->hasFile('qualification_document')) $data['verification_status'] = 'pending';
 
         $data['user_id'] = auth()->id();
-        $data['sports'] = filled($data['sports'] ?? null) ? [trim($data['sports'])] : [];
-        $data['fields'] = array_values(array_filter($data['fields'] ?? []));
-        foreach (['education_history', 'qualification_items', 'teaching_achievements', 'request_achievements'] as $field) {
+        $data['sports'] = array_slice(array_values(array_filter(array_map('trim', $data['sports'] ?? []))), 0, 3);
+        $data['fields'] = array_slice(array_values(array_filter($data['fields'] ?? [])), 0, 1);
+        foreach (['other_affiliations', 'education_history', 'qualification_items', 'teaching_achievements', 'request_achievements'] as $field) {
             $data[$field] = array_values(array_filter(array_map('trim', $data[$field] ?? [])));
         }
         $existingRecommendations = collect($existing ? ($existing->recommendations ?: []) : [])->values();
@@ -158,7 +165,6 @@ class CoachController extends Controller
             ? $request->boolean('direct_offer_enabled')
             : ($existing ? $existing->direct_offer_enabled : true);
         $data['is_student'] = $request->boolean('is_student');
-        $data['degree'] = $data['education_history'][0] ?? null;
         $data['qualifications'] = implode('、', $data['qualification_items']);
         $data['achievements'] = implode("\n", $data['teaching_achievements']);
         $data['request_history'] = implode("\n", $data['request_achievements']);

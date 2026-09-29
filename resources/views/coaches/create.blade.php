@@ -1,15 +1,18 @@
 @extends('layouts.user')
 @section('content')
 @php
-    $education = old('education_history', $coach && $coach->education_history ? $coach->education_history : array_filter([$coach ? $coach->degree : null]));
+    $education = old('education_history', $coach && $coach->education_history ? $coach->education_history : []);
+    $otherAffiliations = old('other_affiliations', $coach && $coach->other_affiliations ? $coach->other_affiliations : []);
     $qualifications = old('qualification_items', $coach && $coach->qualification_items ? $coach->qualification_items : array_slice(preg_split('/[、,\r\n]+/u', (string) ($coach ? $coach->qualifications : ''), -1, PREG_SPLIT_NO_EMPTY), 0, 2));
     $teachingAchievements = old('teaching_achievements', $coach && $coach->teaching_achievements ? $coach->teaching_achievements : array_filter(preg_split('/\r\n|\r|\n/u', (string) ($coach ? $coach->achievements : ''), -1, PREG_SPLIT_NO_EMPTY)));
     $requestAchievements = old('request_achievements', $coach && $coach->request_achievements ? $coach->request_achievements : array_filter(preg_split('/\r\n|\r|\n/u', (string) ($coach ? $coach->request_history : ''), -1, PREG_SPLIT_NO_EMPTY)));
     $recommendations = old('recommendations', $coach && $coach->recommendations ? $coach->recommendations : (($coach && $coach->recommended_athlete) ? [['name' => $coach->recommended_athlete, 'introduction' => '']] : []));
     $savedRecommendations = $coach && $coach->recommendations ? array_values($coach->recommendations) : [];
     $selectedFields = old('fields', $coach ? ($coach->fields ?: []) : []);
+    $selectedFields = array_slice((array) $selectedFields, 0, 1);
     $selectedPrefectures = old('available_prefectures', $coach ? ($coach->available_prefectures ?: []) : []);
-    $selectedSport = old('sports', ($coach && !empty($coach->sports)) ? $coach->sports[0] : '');
+    $selectedSports = old('sports', ($coach && !empty($coach->sports)) ? $coach->sports : []);
+    $selectedSports = is_array($selectedSports) ? array_values($selectedSports) : array_filter([$selectedSports]);
     $directOfferEnabled = (int) old('direct_offer_enabled', $coach ? (int) $coach->direct_offer_enabled : 1);
 @endphp
 
@@ -35,14 +38,16 @@
     </div>
     <label class="student-profile-toggle"><input type="checkbox" name="is_student" value="1" {{ old('is_student', optional($coach)->is_student) ? 'checked' : '' }}><span><strong>学生として登録</strong><small>チェックした場合のみ、公開プロフィールと一覧に学生マークを表示します。</small></span></label>
     <fieldset class="form-fieldset"><legend>対応可能地域 <small>必ず公開されます</small></legend><div class="prefecture-check-grid">@foreach($prefectures as $pref)<label class="compact-check"><input type="checkbox" name="available_prefectures[]" value="{{ $pref }}" {{ in_array($pref, $selectedPrefectures, true) ? 'checked' : '' }}><span>{{ $pref }}</span></label>@endforeach</div></fieldset>
-    <label class="file-field"><span class="label">プロフィール写真</span><input class="field" name="photo" type="file" accept="image/jpeg,image/png,image/webp"><small class="photo-ratio-note"><strong>推奨比率 16:10（横長）</strong>（例 1600 × 1000px） / JPG・PNG・WebP、5MBまで</small></label>
+    <label class="file-field profile-photo-field">@if($coach && $coach->photo_path)<img class="profile-photo-preview" src="{{ str_starts_with($coach->photo_path, 'images/') ? asset($coach->photo_path) : asset('storage/'.$coach->photo_path) }}" alt="現在のプロフィール写真">@endif<span class="label">プロフィール写真</span><input class="field" name="photo" type="file" accept="image/jpeg,image/png,image/webp"><small class="photo-ratio-note"><strong>推奨比率 16:10（横長）</strong>（例 1600 × 1000px） / JPG・PNG・WebP、5MBまで</small></label>
 </section>
 
 <section class="profile-form-section">
     <div class="form-section-title"><span>02</span><div><h2>専門性・評価・実績</h2><p class="meta">比較しやすいよう、項目ごとに簡潔に入力してください。</p></div></div>
-    <fieldset class="form-fieldset"><legend>指導分野 <small>複数選択可</small></legend><div class="choice-grid">@foreach($fields as $field)<label class="choice-tile"><input type="checkbox" name="fields[]" value="{{ $field }}" {{ in_array($field, $selectedFields, true) ? 'checked' : '' }}><span>{{ $field }}</span></label>@endforeach</div></fieldset>
-    <label><span class="label">専門競技 <small>1つまで</small></span><input class="field" name="sports" value="{{ $selectedSport }}" placeholder="バスケットボール"></label>
+    <fieldset class="form-fieldset"><legend>指導分野 <small>1つ選択</small></legend><div class="choice-grid">@foreach($fields as $field)<label class="choice-tile"><input type="radio" name="fields[]" value="{{ $field }}" {{ in_array($field, $selectedFields, true) ? 'checked' : '' }}><span>{{ $field }}</span></label>@endforeach</div></fieldset>
+    <div class="repeat-fields"><div class="repeat-heading"><h3>専門競技</h3><span>最大3件</span></div>@for($i=0;$i<3;$i++)<label class="repeat-field"><span>{{ sprintf('%02d', $i + 1) }}</span><input class="field" name="sports[]" value="{{ $selectedSports[$i] ?? '' }}" placeholder="例：バスケットボール"></label>@endfor</div>
+    <div class="repeat-fields"><div class="repeat-heading"><h3>その他の所属</h3><span>最大3件</span></div>@for($i=0;$i<3;$i++)<label class="repeat-field"><span>{{ sprintf('%02d', $i + 1) }}</span><input class="field" name="other_affiliations[]" value="{{ $otherAffiliations[$i] ?? '' }}" placeholder="団体・研究室・チーム名など"></label>@endfor</div>
     <div class="repeat-fields"><div class="repeat-heading"><h3>学歴</h3><span>最大3件</span></div>@for($i=0;$i<3;$i++)<label class="repeat-field"><span>{{ sprintf('%02d', $i + 1) }}</span><input class="field" name="education_history[]" value="{{ $education[$i] ?? '' }}" placeholder="大学・大学院・専攻など"></label>@endfor</div>
+    <label class="profile-degree-field"><span class="label">学位 <small>1件</small></span><input class="field" name="degree" value="{{ old('degree', optional($coach)->degree) }}" placeholder="例：博士（スポーツ健康科学）"></label>
     <div class="repeat-fields"><div class="repeat-heading"><h3>資格</h3><span>最大2件</span></div>@for($i=0;$i<2;$i++)<label class="repeat-field"><span>{{ $i === 0 ? '①' : '②' }}</span><input class="field" name="qualification_items[]" value="{{ $qualifications[$i] ?? '' }}" placeholder="資格名"></label>@endfor</div>
     <div class="repeat-fields"><div class="repeat-heading"><h3>指導実績</h3><span>1行程度・最大3件</span></div>@for($i=0;$i<3;$i++)<label class="repeat-field"><span>{{ sprintf('%02d', $i + 1) }}</span><input class="field" name="teaching_achievements[]" value="{{ $teachingAchievements[$i] ?? '' }}" placeholder="例：全国大会出場チームを3年間指導"></label>@endfor</div>
     <div class="repeat-fields"><div class="repeat-heading"><h3>依頼実績</h3><span>1行程度・最大3件</span></div>@for($i=0;$i<3;$i++)<label class="repeat-field"><span>{{ sprintf('%02d', $i + 1) }}</span><input class="field" name="request_achievements[]" value="{{ $requestAchievements[$i] ?? '' }}" placeholder="例：高校部活動の年間指導計画を担当"></label>@endfor</div>
@@ -53,7 +58,7 @@
     <div class="form-section-title"><span>03</span><div><h2>オファー条件とメッセージ</h2><p class="meta">直接オファーを受けない場合も、事務局を通じた相談は受け付けられます。</p></div></div>
     <fieldset class="form-fieldset"><legend>直接オファー</legend><div class="segmented-choice"><label><input type="radio" name="direct_offer_enabled" value="1" {{ $directOfferEnabled === 1 ? 'checked' : '' }}><span>許可する</span></label><label><input type="radio" name="direct_offer_enabled" value="0" {{ $directOfferEnabled === 0 ? 'checked' : '' }}><span>許可しない</span></label></div></fieldset>
     <label><span class="label">オファー可能な依頼・希望金額</span><input class="field" name="desired_fee_range" value="{{ old('desired_fee_range', optional($coach)->desired_fee_range) }}" placeholder="例：部活動指導・講習会 / 30,000円〜"></label>
-    <label><span class="label">メッセージ <small>80文字以内</small></span><textarea class="field textarea compact-profile-message" name="message" maxlength="80" placeholder="指導方針やチーム・選手へのメッセージ">{{ old('message', optional($coach)->message) }}</textarea><small class="profile-input-note">一覧カードにも表示されます。要点を簡潔にご入力ください。</small></label>
+    <label><span class="label">紹介文 <small>150文字以内</small></span><textarea class="field textarea compact-profile-message" name="message" maxlength="150" placeholder="指導方針やチーム・選手への紹介文">{{ old('message', optional($coach)->message) }}</textarea><small class="profile-input-note">一覧カードにも表示されます。150文字以内でご入力ください。</small></label>
     <div class="grid2"><label><span class="label">メール（非公開）</span><input class="field" name="email" type="email" value="{{ old('email', optional($coach)->email) }}"></label><label><span class="label">電話（非公開）</span><input class="field" name="phone" value="{{ old('phone', optional($coach)->phone) }}"></label></div>
     <label><span class="label">キーワード <small>プロフィールの最下部に表示</small></span><input class="field" name="keywords" value="{{ old('keywords', optional($coach)->keywords) }}" placeholder="育成年代, パフォーマンス向上, 全国対応"></label>
 </section>
@@ -63,6 +68,6 @@
     <div class="grid2"><label><span class="label">本人確認書類</span><input class="field" name="identity_document" type="file" accept="application/pdf,image/jpeg,image/png"><small class="meta">運転免許証など / PDF・画像、5MBまで</small></label><label><span class="label">資格証明書</span><input class="field" name="qualification_document" type="file" accept="application/pdf,image/jpeg,image/png"><small class="meta">指導資格・専門資格 / PDF・画像、5MBまで</small></label></div>
     @if($coach)<p class="profile-form-status"><span class="badge status">確認状態: {{ $coach->verification_status }}</span><span>プロフィール充実度: {{ $coach->completeness_score }}%</span></p>@endif
 </section>
-<div class="profile-form-submit"><button class="btn" type="submit">{{ $coach ? '変更を保存する' : '登録する' }}</button></div>
+<div class="profile-form-submit"><button class="btn profile-save-btn" type="submit">{{ $coach ? '変更を保存する' : '登録する' }}</button></div>
 </form>
 @endsection

@@ -87,7 +87,7 @@ class DatabaseSeeder extends Seeder
                 'main_prefecture' => '東京',
                 'area' => '渋谷区・都内全域',
                 'sports' => ['柔道', 'バドミントン'],
-                'fields' => ['競技指導', 'トレーニング'],
+                'fields' => ['トレーニング'],
                 'degree' => '博士（スポーツ健康科学）',
                 'qualifications' => '健康運動指導士、スポーツプログラマー',
                 'keywords' => '部活動改革、測定評価、体力向上、怪我予防',
@@ -123,7 +123,7 @@ class DatabaseSeeder extends Seeder
                 'main_prefecture' => '愛知',
                 'area' => '名古屋周辺',
                 'sports' => ['ハンドボール', '陸上競技'],
-                'fields' => ['トレーニング', 'リハビリ'],
+                'fields' => ['リハビリ'],
                 'degree' => '理学療法学士',
                 'qualifications' => '理学療法士、NSCA-CPT',
                 'keywords' => 'フィジカル強化、コンディショニング、傷害予防',
@@ -190,7 +190,8 @@ class DatabaseSeeder extends Seeder
         foreach ($coaches as $coach) {
             $user = User::where('email', $coach['email'])->first();
             $coach['is_student'] = false;
-            $coach['sports'] = array_slice($coach['sports'], 0, 1);
+            $coach['sports'] = array_slice($coach['sports'], 0, 3);
+            $coach['other_affiliations'] = [$coach['main_prefecture'].'スポーツネットワーク'];
             $coach['education_history'] = [$coach['degree']];
             $coach['qualification_items'] = array_slice(preg_split('/[、,\r\n]+/u', $coach['qualifications'], -1, PREG_SPLIT_NO_EMPTY), 0, 2);
             $coach['teaching_achievements'] = [$coach['achievements'], '地域チーム向けの専門講習と育成プログラムを継続して担当。'];
@@ -220,7 +221,7 @@ class DatabaseSeeder extends Seeder
             ['鈴木 一真','Kazuma Suzuki','宮城',['宮城','福島','山形'],'サッカー','競技指導','JFA公認B級コーチ','育成年代の判断力と主体性を伸ばす指導を行います。'],
             ['高橋 奈々','Nana Takahashi','埼玉',['埼玉','東京','千葉'],'バレーボール','トレーニング','JSPO公認コーチ','成長期に合わせた動作を大切にしながら競技力を高めます。'],
             ['伊藤 拓海','Takumi Ito','千葉',['千葉','東京','茨城'],'野球','競技指導','JSBB公認学童コーチ','基礎技術と考える力を両立した練習を設計します。'],
-            ['渡辺 由佳','Yuka Watanabe','神奈川',['神奈川','東京','静岡'],'水泳','コンディショニング','日本水泳連盟公認コーチ','フォーム改善と障害予防を一体でサポートします。'],
+            ['渡辺 由佳','Yuka Watanabe','神奈川',['神奈川','東京','静岡'],'水泳','トレーニング','日本水泳連盟公認コーチ','フォーム改善と障害予防を一体でサポートします。'],
             ['中村 圭介','Keisuke Nakamura','新潟',['新潟','富山','長野'],'陸上競技','競技指導','日本陸連公認コーチ','走動作を映像とタイムの両面から丁寧に改善します。'],
             ['小川 さくら','Sakura Ogawa','静岡',['静岡','愛知','山梨'],'テニス','メンタル','公認スポーツ心理士','試合で力を発揮するためのルーティンづくりを支援します。'],
             ['加藤 亮','Ryo Kato','京都',['京都','大阪','滋賀'],'ラグビー','トレーニング','NSCA-CSCS','安全性を重視したフィジカル強化を提供します。'],
@@ -228,7 +229,7 @@ class DatabaseSeeder extends Seeder
             ['山本 智也','Tomoya Yamamoto','広島',['広島','岡山','山口'],'ソフトボール','競技指導','公認ソフトボールコーチ','チームの目標から逆算した練習計画を作ります。'],
             ['松本 結衣','Yui Matsumoto','香川',['香川','徳島','愛媛'],'複数競技','栄養','公認スポーツ栄養士','家庭と連携できる成長期の食事支援が得意です。'],
             ['井上 大輔','Daisuke Inoue','熊本',['熊本','福岡','鹿児島'],'バスケットボール','競技指導','JBA公認C級コーチ','個人技術をチーム戦術につなげる指導を行います。'],
-            ['木村 遥','Haruka Kimura','北海道',['北海道','青森'],'スキー','コンディショニング','理学療法士','冬季競技の身体づくりと復帰支援を行います。'],
+            ['木村 遥','Haruka Kimura','北海道',['北海道','青森'],'スキー','リハビリ','理学療法士','冬季競技の身体づくりと復帰支援を行います。'],
             ['林 俊介','Shunsuke Hayashi','長野',['長野','群馬','山梨'],'陸上競技','アナリスト','映像分析スペシャリスト','動作データを現場で使える言葉に変えて共有します。'],
             ['清水 愛','Ai Shimizu','福井',['福井','石川','滋賀'],'ハンドボール','リハビリ','アスレティックトレーナー','怪我から競技復帰までチームと伴走します。'],
             ['山口 航平','Kohei Yamaguchi','沖縄',['沖縄'],'サッカー','競技指導','JFA公認C級コーチ','地域の環境に合わせた長期育成を大切にしています。'],
@@ -240,7 +241,7 @@ class DatabaseSeeder extends Seeder
             $isStudent = in_array($index, [1, 6, 13], true);
             $user = User::updateOrCreate(['email' => 'coach'.($index+10).'@example.com'], ['name'=>$name,'password'=>Hash::make('password'),'role'=>'coach','member_type'=>'coach_member','status'=>'approved']);
             CoachProfile::updateOrCreate(['user_id'=>$user->id], [
-                'name'=>$name,'kana'=>'こうにん しどうしゃ','roman_name'=>$roman,'birth_year'=>$isStudent ? 2001+($index%3) : 1980+($index%15),'is_student'=>$isStudent,'affiliation'=>$prefecture.'スポーツサポート','main_prefecture'=>$prefecture,
+                'name'=>$name,'kana'=>'こうにん しどうしゃ','roman_name'=>$roman,'birth_year'=>$isStudent ? 2001+($index%3) : 1980+($index%15),'is_student'=>$isStudent,'affiliation'=>$prefecture.'スポーツサポート','other_affiliations'=>[$prefecture.'競技連盟'],'main_prefecture'=>$prefecture,
                 'available_prefectures'=>$available,'area'=>$prefecture.'県内・オンライン','sports'=>[$sport],'fields'=>[$field],'degree'=>'スポーツ科学関連課程修了','qualifications'=>$qualification,
                 'education_history'=>['スポーツ科学関連課程修了'],'qualification_items'=>[$qualification],
                 'recommendations'=>[

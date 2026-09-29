@@ -2,7 +2,8 @@
 @section('content')
 @php
 $photo = $coach->photo_path ? (\Illuminate\Support\Str::startsWith($coach->photo_path, 'images/') ? asset($coach->photo_path) : asset('storage/'.$coach->photo_path)) : asset('images/sample-coach-profile.png');
-$education = $coach->education_history ?: array_filter([$coach->degree]);
+$education = $coach->education_history ?: [];
+$otherAffiliations = $coach->other_affiliations ?: [];
 $qualifications = $coach->qualification_items ?: array_slice(preg_split('/[、,\r\n]+/u', (string) $coach->qualifications, -1, PREG_SPLIT_NO_EMPTY), 0, 2);
 $teachingAchievements = $coach->teaching_achievements ?: array_filter(preg_split('/\r\n|\r|\n/u', (string) $coach->achievements, -1, PREG_SPLIT_NO_EMPTY));
 $requestAchievements = $coach->request_achievements ?: array_filter(preg_split('/\r\n|\r|\n/u', (string) $coach->request_history, -1, PREG_SPLIT_NO_EMPTY));
@@ -15,12 +16,12 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
     <div class="detail-hero-media"><img src="{{ $photo }}" alt="{{ $coach->name }}"></div>
     <div class="detail-hero-content">
         <div class="eyebrow">COACH PROFILE</div>
-        <div class="detail-badges">@forelse(array_slice((array) $coach->fields, 0, 3) as $field)<span class="badge status">{{ $field }}</span>@empty<span class="badge status">専門分野未設定</span>@endforelse<span class="badge">{{ $coach->main_prefecture }}</span>@if($coach->is_student)<span class="student-badge">学生</span>@endif</div>
+        <div class="detail-badges">@forelse(array_slice((array) $coach->fields, 0, 1) as $field)<span class="badge status">{{ $field }}</span>@empty<span class="badge status">専門分野未設定</span>@endforelse<span class="badge">{{ $coach->main_prefecture }}</span>@if($coach->is_student)<span class="student-badge">学生</span>@endif</div>
         <h1>{{ $coach->name }}</h1>
         <p class="detail-subtitle">{{ $coach->kana }} @if($coach->roman_name)<span>/ {{ $coach->roman_name }}</span>@endif</p>
         <p class="detail-message">{{ $coach->affiliation ?: 'フリーランス指導者' }}</p>
         <div class="hero-metrics">
-            <div><strong>{{ count((array) $coach->fields) }}</strong><span>専門分野</span></div>
+            <div><strong>{{ min(1, count((array) $coach->fields)) }}</strong><span>専門分野</span></div>
             <div><strong>{{ max(1, count((array) $coach->available_prefectures)) }}</strong><span>対応地域</span></div>
             <div><strong>{{ $coach->completeness_score }}%</strong><span>プロフィール充実度</span></div>
         </div>
@@ -37,20 +38,24 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         </div>
         <dl class="coach-basic-grid">
             <div>
-                <dt>学歴</dt>
-                <dd>@forelse($education as $item)<span class="profile-list-line">{{ $item }}</span>@empty 未設定 @endforelse</dd>
-            </div>
-            <div>
-                <dt>対応可能地域</dt>
-                <dd>{{ implode(' / ', $coach->available_prefectures ?: [$coach->main_prefecture]) }}</dd>
-            </div>
-            <div>
                 <dt>所属</dt>
                 <dd>{{ $coach->affiliation ?: '未設定' }}</dd>
             </div>
             <div>
+                <dt>その他の所属</dt>
+                <dd>@forelse($otherAffiliations as $item)<span class="profile-list-line">{{ $item }}</span>@empty 未設定 @endforelse</dd>
+            </div>
+            <div>
+                <dt>学歴</dt>
+                <dd>@forelse($education as $item)<span class="profile-list-line">{{ $item }}</span>@empty 未設定 @endforelse</dd>
+            </div>
+            <div>
+                <dt>学位</dt>
+                <dd>{{ $coach->degree ?: '未設定' }}</dd>
+            </div>
+            <div>
                 <dt>分野</dt>
-                <dd>{{ implode(' / ', (array) $coach->fields) ?: '未設定' }}</dd>
+                <dd>{{ collect((array) $coach->fields)->first() ?: '未設定' }}</dd>
             </div>
             <div>
                 <dt>専門競技</dt>
@@ -59,6 +64,10 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
             <div>
                 <dt>資格</dt>
                 <dd>@forelse($qualifications as $index => $item)<span class="profile-list-line"><b>{{ $index === 0 ? '①' : '②' }}</b>{{ $item }}</span>@empty 未設定 @endforelse</dd>
+            </div>
+            <div>
+                <dt>対応可能地域</dt>
+                <dd>{{ implode(' / ', $coach->available_prefectures ?: [$coach->main_prefecture]) }}</dd>
             </div>
             <div>
                 <dt>登録区分</dt>
@@ -93,7 +102,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <div class="detail-section-title"><span>02</span>
             <div>
                 <div class="eyebrow">VOICE & MESSAGE</div>
-                <h2>推薦者メッセージ</h2>
+                <h2>評価とメッセージ</h2>
             </div>
         </div>
         <div class="recommendation-grid">
@@ -112,7 +121,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
             <div class="profile-empty">推薦コメントは準備中です。</div>
             @endforelse
         </div>
-        <div class="coach-message-block"><span>MESSAGE</span>
+        <div class="coach-message-block"><span>INTRODUCTION</span>
             <p class="preline">{{ $coach->message ?: '指導に関するご相談をお待ちしています。' }}</p>
         </div>
     </section>
@@ -121,7 +130,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <div class="detail-section-title"><span>03</span>
             <div>
                 <div class="eyebrow">AVAILABLE REQUESTS</div>
-                <h2>オファーについて</h2>
+                <h2>オファー可能なご依頼について</h2>
             </div>
         </div>
         <div class="offer-condition"><span>直接オファー</span><strong>{{ $coach->direct_offer_enabled ? '受付中' : '事務局へ相談' }}</strong>

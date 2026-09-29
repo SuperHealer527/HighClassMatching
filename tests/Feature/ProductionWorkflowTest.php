@@ -102,9 +102,11 @@ class ProductionWorkflowTest extends TestCase
             'name' => $coach->name,
             'main_prefecture' => '東京',
             'available_prefectures' => ['東京', '神奈川'],
-            'sports' => 'バスケットボール',
-            'fields' => ['競技指導', 'トレーニング'],
+            'sports' => ['バスケットボール', '陸上競技', '柔道'],
+            'fields' => ['メンタル'],
+            'other_affiliations' => ['地域スポーツ研究会', 'ジュニア育成委員会', '競技連盟'],
             'education_history' => ['体育大学卒業', 'スポーツ科学研究科修了'],
+            'degree' => '修士（スポーツ科学）',
             'qualification_items' => ['公認コーチ', 'CSCS'],
             'recommendations' => [[
                 'name' => '山田選手',
@@ -120,6 +122,10 @@ class ProductionWorkflowTest extends TestCase
 
         $coach->refresh();
         $this->assertSame(['体育大学卒業', 'スポーツ科学研究科修了'], $coach->education_history);
+        $this->assertSame(['地域スポーツ研究会', 'ジュニア育成委員会', '競技連盟'], $coach->other_affiliations);
+        $this->assertSame('修士（スポーツ科学）', $coach->degree);
+        $this->assertSame(['バスケットボール', '陸上競技', '柔道'], $coach->sports);
+        $this->assertSame(['メンタル'], $coach->fields);
         $this->assertSame(['公認コーチ', 'CSCS'], $coach->qualification_items);
         $this->assertSame('山田選手', $coach->recommendations[0]['name']);
         $this->assertNotEmpty($coach->recommendations[0]['image_path']);
@@ -133,11 +139,22 @@ class ProductionWorkflowTest extends TestCase
             ->assertOk()
             ->assertSee('name="direct_offer_enabled" value="0" checked', false)
             ->assertSee('name="is_student" value="1" checked', false)
-            ->assertSee('maxlength="80"', false)
+            ->assertSee('maxlength="150"', false)
             ->assertSee('maxlength="200"', false)
             ->assertSee('name="recommendations[0][image]"', false)
             ->assertSee('name="available_prefectures[]"', false)
-            ->assertSee('name="fields[]"', false);
+            ->assertSee('type="radio" name="fields[]" value="メンタル" checked', false)
+            ->assertSee('name="sports[]"', false)
+            ->assertSee('name="other_affiliations[]"', false)
+            ->assertSee('name="degree"', false);
+
+        $this->actingAs($coachUser)->post(route('coaches.store'), [
+            'name' => $coach->name,
+            'main_prefecture' => '東京',
+            'fields' => ['競技指導', 'メンタル'],
+            'sports' => ['競技1', '競技2', '競技3', '競技4'],
+            'message' => str_repeat('あ', 151),
+        ])->assertSessionHasErrors(['fields', 'sports', 'message']);
     }
 
     public function test_student_coaches_can_be_marked_and_filtered(): void
@@ -179,7 +196,7 @@ class ProductionWorkflowTest extends TestCase
         $this->actingAs($studentUser)->post(route('coaches.store'), [
             'name' => $studentCoach->name,
             'main_prefecture' => '神奈川',
-            'message' => str_repeat('あ', 81),
+            'message' => str_repeat('あ', 151),
         ])->assertSessionHasErrors('message');
     }
 
@@ -293,6 +310,29 @@ class ProductionWorkflowTest extends TestCase
             'password_confirmation' => 'secure-password',
             'role' => 'coach',
         ])->assertSessionHasErrors('email');
+    }
+
+    public function test_registration_stores_referrer_without_browsing_member_wording(): void
+    {
+        $this->get(route('register'))
+            ->assertOk()
+            ->assertSee('紹介者')
+            ->assertSee('チーム・部活')
+            ->assertDontSee('閲覧会員');
+
+        $this->post(route('register'), [
+            'name' => '紹介登録テスト',
+            'email' => 'referred-member@example.com',
+            'password' => 'secure-password',
+            'password_confirmation' => 'secure-password',
+            'role' => 'organization',
+            'referrer' => '地域スポーツ協会 山田様',
+        ])->assertRedirect('/dashboard');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'referred-member@example.com',
+            'referrer' => '地域スポーツ協会 山田様',
+        ]);
     }
 
     public function test_header_service_title_links_to_home(): void

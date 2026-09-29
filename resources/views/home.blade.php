@@ -237,7 +237,7 @@
     <div class="result-grid coach-results">@foreach($featuredCoaches as $coach)@php($photo=$coach->photo_path?(str_starts_with($coach->photo_path,'images/')?asset($coach->photo_path):asset('storage/'.$coach->photo_path)):asset($loop->even?'images/coach-female-editorial.png':'images/sample-coach-profile.png'))<article class="result-card coach-card"><a class="result-image" href="{{ route('coaches.show',$coach) }}"><img src="{{ $photo }}" alt="{{ $coach->name }}"><span class="entity-image-label">COACH PROFILE</span></a>
             <div class="result-card-body"><span><span class="badge status">確認済み</span><span class="badge">{{ $coach->main_prefecture }}</span></span>
                 <h3><a href="{{ route('coaches.show',$coach) }}">{{ $coach->name }}</a></h3>
-                <p>{{ implode(' / ',(array)$coach->fields) }}</p>
+                <p>{{ collect((array) $coach->fields)->first() }}</p>
                 <p class="rating">★ {{ $coach->reviews_avg_rating ? number_format($coach->reviews_avg_rating,1) : 'NEW' }}</p><a class="entity-card-link" href="{{ route('coaches.show',$coach) }}">プロフィールを見る <span>→</span></a>
             </div>
         </article>@endforeach</div>

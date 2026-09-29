@@ -122,7 +122,8 @@ class AdminManagementController extends Controller
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%");
+                    ->orWhere('email', 'like', "%{$keyword}%")
+                    ->orWhere('referrer', 'like', "%{$keyword}%");
             });
         }
 

@@ -960,13 +960,22 @@ input[type="radio"] {
 
 .form {
     display: grid;
+    min-width: 0;
     gap: 16px;
     margin-bottom: 26px;
     padding: 28px;
 }
 
 .grid2 {
+    min-width: 0;
     gap: 16px;
+}
+
+.form > *,
+.grid2 > *,
+.form .field {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .profile-head {
@@ -6017,6 +6026,16 @@ a:active {
     color: #fb5601;
 }
 
+.profile-photo-preview {
+    display: block;
+    width: min(100%, 720px);
+    aspect-ratio: 16 / 10;
+    margin-bottom: 16px;
+    border: 1px solid #d9d9d5;
+    object-fit: cover;
+    object-position: center 24%;
+}
+
 .repeat-fields {
     margin-top: 28px;
     padding-top: 24px;
@@ -6046,6 +6065,11 @@ a:active {
     color: #fb5601;
     font-family: Georgia, serif;
     font-weight: 700;
+}
+
+.profile-degree-field {
+    display: block;
+    margin-top: 18px;
 }
 
 .recommendation-form-grid {
@@ -6131,6 +6155,20 @@ a:active {
 
 .profile-form-submit .btn {
     min-width: 220px;
+}
+
+.profile-form-submit .profile-save-btn {
+    border-color: #fb5601;
+    background: #fb5601;
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(251, 86, 1, .24);
+}
+
+.profile-form-submit .profile-save-btn:hover {
+    border-color: #fff;
+    background: #fff;
+    color: #111;
+    transform: translateY(-2px);
 }
 
 .compact-profile-hero .detail-hero-content {

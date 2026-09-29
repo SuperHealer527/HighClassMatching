@@ -50,6 +50,7 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'not_regex:/[\r\n]/', 'unique:users,email'],
             'password' => ['required', 'min:8', 'confirmed'],
             'role' => ['required', 'in:coach,organization'],
+            'referrer' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = User::create([
@@ -58,12 +59,15 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
             'member_type' => $data['role'] === 'coach' ? 'coach_member' : 'browsing_member',
+            'referrer' => $data['referrer'] ?? null,
             'status' => 'pending',
         ]);
 
         Auth::login($user);
         $user->notify(new MatchingActivityNotification('登録申請を受け付けました', 'プロフィール登録後、運営による確認をお待ちください。'));
-        User::where('role', 'admin')->get()->each->notify(new MatchingActivityNotification('新しい会員登録申請', $user->name.' 様から登録申請が届きました。', '/admin/users'));
+        $adminMessage = $user->name.' 様から登録申請が届きました。'
+            .($user->referrer ? ' 紹介者: '.$user->referrer : '');
+        User::where('role', 'admin')->get()->each->notify(new MatchingActivityNotification('新しい会員登録申請', $adminMessage, '/admin/users'));
         return redirect('/dashboard')->with('status', '会員登録が完了しました。プロフィール登録後、運営承認をお待ちください。');
     }
 

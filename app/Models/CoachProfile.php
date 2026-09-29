@@ -10,7 +10,7 @@ class CoachProfile extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'name', 'kana', 'roman_name', 'birth_year', 'is_student', 'affiliation',
+        'user_id', 'name', 'kana', 'roman_name', 'birth_year', 'is_student', 'affiliation', 'other_affiliations',
         'main_prefecture', 'available_prefectures', 'area', 'sports', 'fields',
         'degree', 'qualifications', 'other_qualifications', 'keywords',
         'target_ages', 'target_levels', 'teaching_styles', 'achievements',
@@ -24,6 +24,7 @@ class CoachProfile extends Model
 
     protected $casts = [
         'available_prefectures' => 'array',
+        'other_affiliations' => 'array',
         'sports' => 'array',
         'fields' => 'array',
         'is_former_athlete' => 'boolean',

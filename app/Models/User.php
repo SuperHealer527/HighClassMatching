@@ -17,6 +17,7 @@ class User extends Authenticatable
         'password',
         'role',
         'member_type',
+        'referrer',
         'status',
     ];
 
