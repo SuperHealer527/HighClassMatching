@@ -84,7 +84,19 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         </dl>
     </section>
 
+    <div class="detail-section-title" style="margin-bottom: 20px;"><span>02</span>
+        <div>
+            <div class="eyebrow">VOICE & MESSAGE</div>
+            <h2>指導哲学と実績</h2>
+        </div>
+    </div>
     <section class="profile-records-panel" aria-label="指導実績と依頼実績">
+        <div class="coach-message-block"><span>INTRODUCTION</span>
+            <p class="preline">{{ $coach->message ?: '指導に関するご相談をお待ちしています。' }}</p>
+        </div>
+        @if($coach->keywords)<div class="profile-keywords"><span>KEYWORDS</span>
+            <p>{{ $coach->keywords }}</p>
+        </div>@endif
         <div class="achievement-columns">
             <div>
                 <h3>指導実績</h3>
@@ -95,11 +107,10 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
                 <ol>@forelse($requestAchievements as $item)<li>{{ $item }}</li>@empty<li>依頼実績は準備中です。</li>@endforelse</ol>
             </div>
         </div>
-        @if($coach->keywords)<div class="profile-keywords"><span>KEYWORDS</span><p>{{ $coach->keywords }}</p></div>@endif
     </section>
 
     <section class="detail-section profile-compact-section">
-        <div class="detail-section-title"><span>02</span>
+        <div class="detail-section-title"><span>03</span>
             <div>
                 <div class="eyebrow">VOICE & MESSAGE</div>
                 <h2>評価とメッセージ</h2>
@@ -108,26 +119,25 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <div class="recommendation-grid">
             @forelse($recommendations as $recommendation)
             @php
-                $recommendationImagePath = $recommendation['image_path'] ?? null;
-                $recommendationImage = $recommendationImagePath
-                    ? (str_starts_with($recommendationImagePath, 'images/') ? asset($recommendationImagePath) : asset('storage/'.$recommendationImagePath))
-                    : asset($recommendationFallbacks[$loop->index % count($recommendationFallbacks)]);
+            $recommendationImagePath = $recommendation['image_path'] ?? null;
+            $recommendationImage = $recommendationImagePath
+            ? (str_starts_with($recommendationImagePath, 'images/') ? asset($recommendationImagePath) : asset('storage/'.$recommendationImagePath))
+            : asset($recommendationFallbacks[$loop->index % count($recommendationFallbacks)]);
             @endphp
-            <article class="recommendation-card"><img class="recommendation-card-image" src="{{ $recommendationImage }}" alt="{{ $recommendation['name'] ?: '推薦者' }}"><div class="recommendation-card-body"><span>RECOMMENDATION</span>
-                <h3>{{ $recommendation['name'] ?: '推薦者' }}</h3>
-                <p>{{ $recommendation['introduction'] ?: 'この指導者を推薦します。' }}</p>
-            </div></article>
+            <article class="recommendation-card"><img class="recommendation-card-image" src="{{ $recommendationImage }}" alt="{{ $recommendation['name'] ?: '推薦者' }}">
+                <div class="recommendation-card-body"><span>RECOMMENDATION</span>
+                    <h3>{{ $recommendation['name'] ?: '推薦者' }}</h3>
+                    <p>{{ $recommendation['introduction'] ?: 'この指導者を推薦します。' }}</p>
+                </div>
+            </article>
             @empty
             <div class="profile-empty">推薦コメントは準備中です。</div>
             @endforelse
         </div>
-        <div class="coach-message-block"><span>INTRODUCTION</span>
-            <p class="preline">{{ $coach->message ?: '指導に関するご相談をお待ちしています。' }}</p>
-        </div>
     </section>
 
     <section class="detail-section profile-compact-section profile-offer-section">
-        <div class="detail-section-title"><span>03</span>
+        <div class="detail-section-title"><span>04</span>
             <div>
                 <div class="eyebrow">AVAILABLE REQUESTS</div>
                 <h2>オファー可能なご依頼について</h2>
