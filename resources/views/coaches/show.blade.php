@@ -23,7 +23,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <div class="hero-metrics">
             <div><strong>{{ min(1, count((array) $coach->fields)) }}</strong><span>専門分野</span></div>
             <div><strong>{{ max(1, count((array) $coach->available_prefectures)) }}</strong><span>対応地域</span></div>
-            <div><strong>{{ $coach->completeness_score }}%</strong><span>プロフィール充実度</span></div>
+            <div><strong>{{ $coach->completeness_score }}%</strong><span>プロフィール<br>充実度</span></div>
         </div>
     </div>
 </section>

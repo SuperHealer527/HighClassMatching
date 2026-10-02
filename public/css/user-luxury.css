@@ -2624,7 +2624,7 @@ nav[role="navigation"] {
     max-width: 720px;
     margin: 0 0 16px;
     font-family: 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-    font-size: clamp(38px, 5vw, 66px);
+    font-size: clamp(38px, 5vw, 45px);
     font-weight: 600;
     overflow-wrap: anywhere;
 }
@@ -6181,8 +6181,27 @@ a:active {
     min-width: 0;
 }
 
+.compact-profile-hero .hero-metrics {
+    grid-template-columns: .9fr .9fr 1.2fr;
+}
+
+.compact-profile-hero .hero-metrics > div {
+    align-content: center;
+    padding-inline: 12px;
+}
+
 .compact-profile-hero .hero-metrics span {
-    overflow-wrap: anywhere;
+    line-height: 1.45;
+    overflow-wrap: normal;
+    word-break: keep-all;
+}
+
+.compact-profile-hero .hero-metrics > div:last-child {
+    padding-inline: 8px;
+}
+
+.compact-profile-hero .hero-metrics > div:last-child span {
+    font-size: 9px;
 }
 
 .profile-actionbar {
