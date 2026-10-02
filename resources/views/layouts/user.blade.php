@@ -112,6 +112,34 @@ if ('IntersectionObserver' in window) {
 } else {
     document.querySelectorAll('.reveal').forEach(function (element) { element.classList.add('is-visible'); });
 }
+
+var coachProfileHero = document.querySelector('.profile-detail-hero');
+if (coachProfileHero) {
+    var coachMotionTargets = [coachProfileHero].concat(Array.prototype.slice.call(document.querySelectorAll(
+        '.coach-profile-content .profile-compact-section, .coach-profile-content > .detail-section-title, .coach-profile-content > .profile-records-panel, .coach-profile-content > .profile-bottom-offer'
+    )));
+
+    coachMotionTargets.forEach(function (element, index) {
+        element.classList.add('coach-float-reveal');
+        element.style.setProperty('--coach-reveal-order', String(index));
+    });
+    document.body.classList.add('coach-motion-ready');
+
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        var coachMotionObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    coachMotionObserver.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+
+        coachMotionTargets.forEach(function (element) { coachMotionObserver.observe(element); });
+    } else {
+        coachMotionTargets.forEach(function (element) { element.classList.add('is-visible'); });
+    }
+}
 </script>
 </body>
 </html>

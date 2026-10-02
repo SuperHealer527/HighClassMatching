@@ -84,7 +84,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         </dl>
     </section>
 
-    <div class="detail-section-title" style="margin-bottom: 20px;"><span>02</span>
+    <div class="detail-section-title"><span>02</span>
         <div>
             <div class="eyebrow">VOICE & MESSAGE</div>
             <h2>指導哲学と実績</h2>
