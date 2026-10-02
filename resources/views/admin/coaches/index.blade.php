@@ -13,7 +13,57 @@
             <thead><tr><th>ID</th><th>&#25351;&#23566;&#32773;</th><th>&#37117;&#36947;&#24220;&#30476;</th><th>Type</th><th>Fields</th><th>Verification</th><th>Status</th><th>User</th><th></th></tr></thead>
             <tbody>
             @forelse($coaches as $coach)
-                <tr><td>{{ $coach->id }}</td><td><strong>{{ $coach->name }}</strong><div class="text-secondary small">{{ $coach->kana }} / {{ $coach->roman_name }}</div><a class="small" href="{{ route('coaches.show',$coach) }}">Public profile</a></td><td>{{ $coach->main_prefecture }}</td><td><span class="badge badge-soft">{{ $coach->is_student ? 'student' : 'general' }}</span></td><td>{{ implode(' / ', (array)$coach->fields) }}</td><td><span class="badge badge-soft">{{ $coach->verification_status }}</span><div class="d-flex gap-1 my-2">@if($coach->identity_document_path)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'identity']) }}">ID</a>@endif @if($coach->qualification_document_path)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'qualification']) }}">Cert</a>@endif</div><form method="post" action="{{ route('admin.coaches.verify',$coach) }}" class="d-flex gap-1">@csrf @method('PATCH')<select class="form-select form-select-sm" name="verification_status"><option value="verified" {{ $coach->verification_status === 'verified' ? 'selected' : '' }}>verified</option><option value="rejected" {{ $coach->verification_status === 'rejected' ? 'selected' : '' }}>rejected</option></select><button class="btn btn-primary btn-sm">Set</button></form></td><td><span class="badge badge-soft">{{ $coach->status }}</span></td><td>{{ optional($coach->user)->email }}</td><td><form method="post" action="{{ route('admin.coaches.status',$coach) }}" class="d-flex gap-2">@csrf @method('PATCH')<select class="form-select form-select-sm" name="status">@foreach(['pending','approved','rejected','suspended'] as $status)<option value="{{ $status }}" {{ $coach->status === $status ? 'selected' : '' }}>{{ $status }}</option>@endforeach</select><button class="btn btn-primary btn-sm" type="submit">Update</button></form></td></tr>
+                @php
+                    $hasIdentityDocument = filled($coach->identity_document_path);
+                    $hasQualificationDocument = filled($coach->qualification_document_path);
+                    $hasRequiredDocuments = $hasIdentityDocument && $hasQualificationDocument;
+                    $isVerified = $coach->verification_status === 'verified';
+                @endphp
+                <tr>
+                    <td>{{ $coach->id }}</td>
+                    <td>
+                        <strong>{{ $coach->name }}</strong>
+                        <div class="text-secondary small">{{ $coach->kana }} / {{ $coach->roman_name }}</div>
+                        <a class="small" href="{{ route('coaches.show',$coach) }}">Public profile</a>
+                    </td>
+                    <td>{{ $coach->main_prefecture }}</td>
+                    <td><span class="badge badge-soft">{{ $coach->is_student ? 'student' : 'general' }}</span></td>
+                    <td>{{ implode(' / ', (array)$coach->fields) }}</td>
+                    <td>
+                        <span class="badge badge-soft">{{ $coach->verification_status }}</span>
+                        <div class="d-flex gap-1 my-2">
+                            @if($hasIdentityDocument)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'identity']) }}">ID</a>@else<span class="badge text-bg-secondary">ID missing</span>@endif
+                            @if($hasQualificationDocument)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'qualification']) }}">Cert</a>@else<span class="badge text-bg-secondary">Cert missing</span>@endif
+                        </div>
+                        <form method="post" action="{{ route('admin.coaches.verify',$coach) }}" class="d-flex gap-1">
+                            @csrf
+                            @method('PATCH')
+                            <select class="form-select form-select-sm" name="verification_status" aria-label="{{ $coach->name }} verification status">
+                                @if(!$isVerified && $coach->verification_status !== 'rejected')<option value="" selected>Select</option>@endif
+                                <option value="verified" {{ $isVerified ? 'selected' : '' }} {{ !$hasRequiredDocuments && !$isVerified ? 'disabled' : '' }}>verified</option>
+                                <option value="rejected" {{ $coach->verification_status === 'rejected' ? 'selected' : '' }}>rejected</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" type="submit">Set</button>
+                        </form>
+                        @error('coach_verification_'.$coach->id)<div class="text-danger small mt-2">{{ $message }}</div>@enderror
+                    </td>
+                    <td><span class="badge badge-soft">{{ $coach->status }}</span></td>
+                    <td>{{ optional($coach->user)->email }}</td>
+                    <td>
+                        <form method="post" action="{{ route('admin.coaches.status',$coach) }}" class="d-grid gap-2">
+                            @csrf
+                            @method('PATCH')
+                            <select class="form-select form-select-sm" name="status" aria-label="{{ $coach->name }} profile status">
+                                @foreach(['pending','approved','rejected','suspended'] as $status)
+                                    <option value="{{ $status }}" {{ $coach->status === $status ? 'selected' : '' }} {{ $status === 'approved' && !$isVerified ? 'disabled' : '' }}>{{ $status }}</option>
+                                @endforeach
+                            </select>
+                            <button class="btn btn-primary btn-sm" type="submit">Update</button>
+                        </form>
+                        @if(!$isVerified)<div class="text-warning small mt-2">Verify first</div>@endif
+                        @error('coach_status_'.$coach->id)<div class="text-danger small mt-2">{{ $message }}</div>@enderror
+                    </td>
+                </tr>
             @empty
                 <tr><td colspan="9" class="text-secondary">&#25351;&#23566;&#32773;&#12487;&#12540;&#12479;&#12399;&#12354;&#12426;&#12414;&#12379;&#12435;&#12290;</td></tr>
             @endforelse

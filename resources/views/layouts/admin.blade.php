@@ -38,6 +38,14 @@
             <form method="post" action="{{ route('logout') }}">@csrf <button class="btn btn-outline-light" type="submit">&#12525;&#12464;&#12450;&#12454;&#12488;</button></form>
         </div>
         @if(session('status'))<div class="alert alert-success">{{ session('status') }}</div>@endif
+        @if($errors->any())
+            <div class="alert alert-danger" role="alert">
+                <strong>更新できませんでした。</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                </ul>
+            </div>
+        @endif
         @yield('content')
     </main>
 </div>

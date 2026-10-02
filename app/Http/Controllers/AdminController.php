@@ -28,7 +28,11 @@ class AdminController extends Controller
     public function updateCoachStatus(Request $request, CoachProfile $coach)
     {
         $data = $request->validate(['status' => ['required', 'in:pending,approved,rejected,suspended']]);
-        if ($data['status'] === 'approved') abort_unless($coach->verification_status === 'verified', 422, '本人確認と資格確認を先に完了してください。');
+        if ($data['status'] === 'approved' && $coach->verification_status !== 'verified') {
+            return back()->withErrors([
+                'coach_status_'.$coach->id => '承認する前に、本人確認と資格確認を「verified」に更新してください。',
+            ])->withInput();
+        }
         $coach->update($data);
         optional($coach->user)->update(['status' => $data['status']]);
         optional($coach->user)->notify(new MatchingActivityNotification('指導者プロフィール状態の更新', 'プロフィール状態が「'.$data['status'].'」に更新されました。', '/dashboard'));
@@ -38,8 +42,12 @@ class AdminController extends Controller
     public function verifyCoach(Request $request, CoachProfile $coach)
     {
         $data = $request->validate(['verification_status' => ['required', 'in:verified,rejected']]);
-        if ($data['verification_status'] === 'verified') {
-            abort_unless(($coach->identity_document_path && $coach->qualification_document_path) || $coach->verification_status === 'verified', 422, '確認書類が2点必要です。');
+        if ($data['verification_status'] === 'verified'
+            && (!$coach->identity_document_path || !$coach->qualification_document_path)
+            && $coach->verification_status !== 'verified') {
+            return back()->withErrors([
+                'coach_verification_'.$coach->id => '本人確認書類と資格確認書類の両方が必要です。',
+            ])->withInput();
         }
         $coach->update($data);
         optional($coach->user)->notify(new MatchingActivityNotification('本人・資格確認の更新', '確認状態が「'.$data['verification_status'].'」になりました。', '/dashboard'));
@@ -86,7 +94,11 @@ class AdminController extends Controller
 
     public function approveCoach(CoachProfile $coach)
     {
-        abort_unless($coach->verification_status === 'verified', 422, '本人確認と資格確認を先に完了してください。');
+        if ($coach->verification_status !== 'verified') {
+            return back()->withErrors([
+                'coach_status_'.$coach->id => '承認する前に、本人確認と資格確認を「verified」に更新してください。',
+            ]);
+        }
         $coach->update(['status' => 'approved']);
         optional($coach->user)->update(['status' => 'approved']);
         optional($coach->user)->notify(new MatchingActivityNotification('指導者プロフィール承認', '指導者プロフィールが承認され、公開されました。', '/coaches/'.$coach->id));
