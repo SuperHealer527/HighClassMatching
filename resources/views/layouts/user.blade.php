@@ -25,8 +25,8 @@
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="メニューを開く"><span></span><span></span><span></span><small>MENU</small></button>
         <nav class="nav" id="primary-navigation">
             <a @class(['is-current' => request()->routeIs('coaches.*')]) href="{{ route('coaches.index') }}"><small>COACH</small><strong>指導者を探す</strong></a>
-            <a @class(['is-current' => request()->routeIs('jobs.*')]) href="{{ route('jobs.index') }}"><small>OPPORTUNITY</small><strong>案件を探す</strong></a>
-            <a @class(['is-current' => request()->routeIs('organizations.*')]) href="{{ route('organizations.index') }}"><small>COMMUNITY</small><strong>チーム・部活</strong></a>
+            <a @class(['is-current' => request()->routeIs('jobs.*')]) href="{{ route('jobs.index') }}"><small>OFFER</small><strong>案件を探す</strong></a>
+            <a @class(['is-current' => request()->routeIs('organizations.*')]) href="{{ route('organizations.index') }}"><small>TEAM</small><strong>チーム・部活</strong></a>
             <a @class(['is-current' => request()->routeIs('articles.*')]) href="{{ route('articles.index') }}"><small>JOURNAL</small><strong>記事を読む</strong></a>
             @auth
                 @if(auth()->user()->isAdmin())
