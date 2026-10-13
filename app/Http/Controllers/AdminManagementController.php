@@ -15,7 +15,9 @@ class AdminManagementController extends Controller
 {
     public function coaches(Request $request)
     {
-        $query = CoachProfile::with('user');
+        $query = CoachProfile::with('user')->withCount([
+            'revisionRequests as open_revision_requests_count' => fn ($query) => $query->where('status', 'open'),
+        ]);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -23,6 +25,10 @@ class AdminManagementController extends Controller
 
         if (in_array($request->student, ['0', '1'], true)) {
             $query->where('is_student', $request->student === '1');
+        }
+
+        if ($request->filled('verification_status')) {
+            $query->where('verification_status', $request->verification_status);
         }
 
         if ($request->filled('keyword')) {
@@ -38,6 +44,16 @@ class AdminManagementController extends Controller
         return view('admin.coaches.index', [
             'coaches' => $query->latest()->paginate(15)->withQueryString(),
         ]);
+    }
+
+    public function coach(CoachProfile $coach)
+    {
+        $coach->load([
+            'user',
+            'revisionRequests' => fn ($query) => $query->with('requestedBy')->latest(),
+        ]);
+
+        return view('admin.coaches.show', compact('coach'));
     }
 
     public function organizations(Request $request)

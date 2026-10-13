@@ -12,6 +12,7 @@ use App\Services\MatchingService;
 use App\Models\Offer;
 use App\Models\Review;
 use App\Models\Article;
+use App\Models\ProfileRevisionRequest;
 
 class DashboardController extends Controller
 {
@@ -31,6 +32,7 @@ class DashboardController extends Controller
                     'offerCount' => Offer::count(),
                     'reviewCount' => Review::where('status','published')->count(),
                     'articleCount' => Article::where('status','published')->count(),
+                    'openRevisionRequestCount' => ProfileRevisionRequest::open()->count(),
                     'pendingJobList' => Job::with('organization')->where('status', 'pending_review')->latest()->get(),
                     'applications' => Application::with('job.organization', 'coachProfile')->latest()->take(20)->get(),
                 ])
@@ -53,6 +55,7 @@ class DashboardController extends Controller
             'recommendationContext' => $latestJob,
             'inquiryCount' => $user->inquiries()->whereIn('status', ['open', 'in_progress'])->count(),
             'unreadNotificationCount' => $user->unreadNotifications()->count(),
+            'profileRevisionRequests' => $coach ? $coach->revisionRequests()->with('requestedBy')->latest()->get() : collect(),
         ]);
     }
 }

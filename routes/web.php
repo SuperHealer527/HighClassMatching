@@ -4,6 +4,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminArticleController;
 use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\AdminExportController;
+use App\Http\Controllers\AdminProjectMemberController;
+use App\Http\Controllers\AdminProfileRevisionRequestController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\ProfileRevisionRequestController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\MatchingMasterController;
 use App\Http\Controllers\VerificationDocumentController;
@@ -66,9 +69,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifications/{notification}', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::patch('/profile-revision-requests/{profileRevisionRequest}/complete', [ProfileRevisionRequestController::class, 'complete'])->name('profile-revision-requests.complete');
     Route::middleware('admin')->group(function () {
         Route::get('/admin/users', [AdminManagementController::class, 'users'])->name('admin.users.index');
         Route::get('/admin/coaches', [AdminManagementController::class, 'coaches'])->name('admin.coaches.index');
+        Route::get('/admin/coaches/{coach}', [AdminManagementController::class, 'coach'])->name('admin.coaches.show');
         Route::get('/admin/organizations', [AdminManagementController::class, 'organizations'])->name('admin.organizations.index');
         Route::get('/admin/jobs', [AdminManagementController::class, 'jobs'])->name('admin.jobs.index');
         Route::get('/admin/applications', [AdminManagementController::class, 'applications'])->name('admin.applications.index');
@@ -79,6 +84,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::patch('/admin/inquiries/{inquiry}', [InquiryController::class, 'reply'])->name('admin.inquiries.reply');
         Route::get('/admin/export/{resource}', AdminExportController::class)->name('admin.export');
         Route::resource('/admin/articles', AdminArticleController::class)->except(['show', 'destroy'])->names('admin.articles');
+        Route::resource('/admin/project-members', AdminProjectMemberController::class)->except('show')->names('admin.project-members');
         Route::get('/admin/masters', [MatchingMasterController::class, 'index'])->name('admin.masters.index');
         Route::post('/admin/masters', [MatchingMasterController::class, 'store'])->name('admin.masters.store');
         Route::patch('/admin/masters/{master}', [MatchingMasterController::class, 'update'])->name('admin.masters.update');
@@ -91,6 +97,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
         Route::patch('/admin/organizations/{organization}/status', [AdminController::class, 'updateOrganizationStatus'])->name('admin.organizations.status');
         Route::patch('/admin/jobs/{job}/status', [AdminController::class, 'updateJobStatus'])->name('admin.jobs.status');
         Route::patch('/admin/coaches/{coach}/verify', [AdminController::class, 'verifyCoach'])->name('admin.coaches.verify');
+        Route::post('/admin/coaches/{coach}/revision-requests', [AdminProfileRevisionRequestController::class, 'store'])->name('admin.coaches.revision-requests.store');
+        Route::patch('/admin/profile-revision-requests/{profileRevisionRequest}', [AdminProfileRevisionRequestController::class, 'update'])->name('admin.profile-revision-requests.update');
         Route::patch('/admin/reviews/{review}/status', [AdminController::class, 'updateReviewStatus'])->name('admin.reviews.status');
     });
 });

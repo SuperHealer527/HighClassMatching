@@ -61,21 +61,9 @@
             <span>COMPANY</span>
             <p>事務局：</p>
             <strong>一般社団法人Back Athlete機構</strong>
-            <nav class="footer-social" aria-label="公式サイト・SNS">
-                <span>FOLLOW / CONNECT</span>
-                @foreach(config('matching.social_links', []) as $social)
-                    @if($social['url'])
-                        <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer">
-                            <small>{{ $social['code'] }}</small>
-                            <strong>{{ $social['label'] }}</strong>
-                            <i aria-hidden="true">↗</i>
-                        </a>
-                    @endif
-                @endforeach
-            </nav>
         </div>
     </div>
-    <div class="footer-bottom"><span>© {{ date('Y') }} Highclass Inc.</span><span>HEALTH × SPORTS × COMMUNITY</span><a href="#">PAGE TOP ↑</a></div>
+    <div class="footer-bottom"><span>© {{ date('Y') }} Back Athlete</span><span>HEALTH × SPORTS × COMMUNITY</span><a href="#">PAGE TOP ↑</a></div>
 </footer>
 <script>
 var navToggle = document.querySelector('.nav-toggle');

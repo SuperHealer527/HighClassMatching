@@ -56,6 +56,7 @@ class CoachProfile extends Model
     public function offers() { return $this->hasMany(Offer::class); }
     public function reviews() { return $this->hasMany(Review::class)->where('status', 'published'); }
     public function favoritedByOrganizations() { return $this->belongsToMany(Organization::class, 'coach_favorites')->withTimestamps(); }
+    public function revisionRequests() { return $this->hasMany(ProfileRevisionRequest::class); }
 
     public function reviewAverage(): float
     {

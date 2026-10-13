@@ -382,7 +382,7 @@ input[type="radio"] {
 
 .container {
     max-width: 1360px;
-    padding: 64px 32px 112px;
+    padding: 64px 32px 96px;
 }
 
 .eyebrow {
@@ -1971,11 +1971,11 @@ input[type="radio"] {
 }
 
 .home-section {
-    padding: 0 0 110px;
+    padding: 0 0 50px;
 }
 
 .contrast-band {
-    margin: 0 -32px 110px;
+    margin: 0 -32px 80px;
     padding: 78px 32px;
     background: #111;
     color: #fff;
@@ -7956,13 +7956,119 @@ a:active {
     }
 }
 
+/* Coach correction requests */
+.revision-request-workspace {
+    position: relative;
+    overflow: hidden;
+    border-top: 3px solid var(--accent);
+    background: #111;
+    color: #fff;
+}
+
+.revision-request-workspace::after {
+    position: absolute;
+    top: -80px;
+    right: -60px;
+    width: 240px;
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 50%;
+    box-shadow: 0 0 0 36px rgba(255, 255, 255, .025);
+    content: "";
+    pointer-events: none;
+}
+
+.revision-request-workspace .section-heading {
+    position: relative;
+    z-index: 1;
+    border-color: #393939;
+}
+
+.revision-request-workspace .section-heading h2,
+.revision-request-workspace .section-heading a {
+    color: #fff;
+}
+
+.member-revision-list {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 14px;
+    padding-top: 26px;
+}
+
+.member-revision-item {
+    padding: 24px 26px;
+    border: 1px solid #3c3c3c;
+    border-left: 3px solid var(--accent);
+    background: #181818;
+}
+
+.member-revision-item header,
+.member-revision-item footer,
+.member-revision-item footer > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.member-revision-item header span {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.member-revision-item header time,
+.member-revision-item footer small,
+.member-revision-item footer > time {
+    color: #999;
+    font-size: 11px;
+}
+
+.member-revision-item p {
+    margin: 18px 0 22px;
+    color: #eee;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre-line;
+}
+
+.member-revision-item form {
+    margin: 0;
+}
+
+.member-revision-item.is-completed {
+    border-left-color: #555;
+    opacity: .68;
+}
+
+@media (max-width: 640px) {
+    .member-revision-item header,
+    .member-revision-item footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .member-revision-item footer > div {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .member-revision-item footer .btn {
+        width: 100%;
+    }
+}
+
 /* Homepage news and project team */
 .home-news-section {
     display: grid;
     grid-template-columns: minmax(240px, .72fr) minmax(0, 1.8fr);
     gap: clamp(44px, 7vw, 110px);
-    padding-top: 88px;
-    padding-bottom: 96px;
+    padding-top: 50px;
+    padding-bottom: 50px;
     border-top: 1px solid var(--line);
 }
 
@@ -7970,8 +8076,9 @@ a:active {
 .project-team-heading {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    gap: 32px;
+    align-items: flex-start;
+    gap: 16px;
+    flex-direction: column;
 }
 
 .news-heading {
@@ -8063,14 +8170,14 @@ a:active {
 .project-team-section {
     width: 100vw;
     margin: 0 calc(50% - 50vw);
-    padding: 96px max(32px, calc((100vw - 1296px) / 2)) 108px;
+    padding: 50px max(32px, calc((100vw - 1296px) / 2)) 50px;
     overflow: hidden;
     color: #fff;
     background: #0b0b0b;
 }
 
 .project-team-section::before {
-    content: "TEAM / 08";
+    content: "TEAM / " attr(data-team-count);
     position: absolute;
     right: 3vw;
     color: rgba(255, 255, 255, .045);
@@ -8086,7 +8193,7 @@ a:active {
 .project-team-heading {
     position: relative;
     z-index: 1;
-    padding-bottom: 44px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #3a3a3a;
 }
 
@@ -8100,9 +8207,18 @@ a:active {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
     gap: clamp(12px, 1.6vw, 24px);
     padding-top: 48px;
+}
+
+.project-team-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 54px 0;
+    border-top: 1px solid #333;
+    color: #999;
+    text-align: center;
 }
 
 .project-member {

@@ -6,6 +6,20 @@
     @if($user->isCoach())<div class="summary-action"><span class="meta">PROFILE</span>@if($coach)<h2>{{ $coach->name }}</h2><p>審査状態: {{ $coach->status }}</p><div class="page-actions"><a class="btn secondary" href="{{ route('coaches.show',$coach) }}">プロフィール表示</a><a class="btn" href="{{ route('coaches.create') }}">編集</a></div>@else<h2>プロフィール未登録</h2><p>応募にはプロフィール登録と運営承認が必要です。</p><a class="btn" href="{{ route('coaches.create') }}">登録する</a>@endif</div>@endif
     @if($user->isOrganization())<div class="summary-action"><span class="meta">TEAM / CLUB</span>@if($organization)<h2>{{ $organization->name }}</h2><p>審査状態: {{ $organization->status }}</p><div class="page-actions"><a class="btn secondary" href="{{ route('organizations.show',$organization) }}">チーム・部活を表示</a><a class="btn secondary" href="{{ route('organizations.create') }}">編集</a>@if($organization->isApproved())<a class="btn" href="{{ route('jobs.create') }}">案件登録</a>@endif</div>@else<h2>チーム・部活未登録</h2><p>案件掲載にはチーム・部活プロフィール登録が必要です。</p><a class="btn" href="{{ route('organizations.create') }}">登録する</a>@endif</div>@endif
 </section>
+@if($user->isCoach() && $profileRevisionRequests->count())
+<section class="workspace-section revision-request-workspace">
+    <div class="section-heading"><div><div class="eyebrow">PROFILE REVIEW</div><h2>運営からのプロフィール修正依頼</h2></div>@if($coach)<a href="{{ route('coaches.create') }}">プロフィールを編集 →</a>@endif</div>
+    <div class="member-revision-list">
+        @foreach($profileRevisionRequests as $revisionRequest)
+            <article class="member-revision-item {{ $revisionRequest->status === 'completed' ? 'is-completed' : '' }}">
+                <header><span>{{ $revisionRequest->status === 'open' ? '対応をお願いします' : '対応完了' }}</span><time>{{ $revisionRequest->created_at->format('Y.m.d H:i') }}</time></header>
+                <p>{{ $revisionRequest->message }}</p>
+                <footer><small>{{ optional($revisionRequest->requestedBy)->name ?: '運営事務局' }}</small>@if($revisionRequest->status === 'open')<div><a class="btn secondary" href="{{ route('coaches.create') }}">プロフィールを修正</a><form method="post" action="{{ route('profile-revision-requests.complete', $revisionRequest) }}">@csrf @method('PATCH')<button class="btn" type="submit">修正完了を連絡</button></form></div>@else<time>完了: {{ optional($revisionRequest->completed_at)->format('Y.m.d H:i') }}</time>@endif</footer>
+            </article>
+        @endforeach
+    </div>
+</section>
+@endif
 @if($user->isCoach())
 <section class="workspace-section"><div class="section-heading"><div><div class="eyebrow">APPLICATIONS</div><h2>応募・選考状況</h2></div><a href="{{ route('jobs.index') }}">案件を探す →</a></div>
 @forelse($applications as $app)

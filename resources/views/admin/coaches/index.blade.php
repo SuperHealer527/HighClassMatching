@@ -1,75 +1,38 @@
 @extends('layouts.admin')
-@section('title','Coaches')
+@section('title','指導者審査')
 @section('content')
-<section class="glass-card p-4">
-    <div class="d-flex justify-content-between gap-3 flex-wrap mb-4"><form class="row g-2 flex-grow-1" method="get">
-        <div class="col-md"><input class="form-control" name="keyword" value="{{ request('keyword') }}" placeholder="Name, prefecture, field"></div>
-        <div class="col-md-3"><select class="form-select" name="status"><option value="">All status</option>@foreach(['pending','approved','rejected','suspended'] as $status)<option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ $status }}</option>@endforeach</select></div>
-        <div class="col-md-2"><select class="form-select" name="student"><option value="">All types</option><option value="1" {{ request('student') === '1' ? 'selected' : '' }}>Students</option><option value="0" {{ request('student') === '0' ? 'selected' : '' }}>General</option></select></div>
-        <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Search</button></div>
-    </form><a class="btn btn-outline-light" href="{{ route('admin.export','coaches') }}">CSV Export</a></div>
-    <div class="table-responsive">
-        <table class="table table-darkish align-middle">
-            <thead><tr><th>ID</th><th>&#25351;&#23566;&#32773;</th><th>&#37117;&#36947;&#24220;&#30476;</th><th>Type</th><th>Fields</th><th>Verification</th><th>Status</th><th>User</th><th></th></tr></thead>
-            <tbody>
-            @forelse($coaches as $coach)
-                @php
-                    $hasIdentityDocument = filled($coach->identity_document_path);
-                    $hasQualificationDocument = filled($coach->qualification_document_path);
-                    $hasRequiredDocuments = $hasIdentityDocument && $hasQualificationDocument;
-                    $isVerified = $coach->verification_status === 'verified';
-                @endphp
-                <tr>
-                    <td>{{ $coach->id }}</td>
-                    <td>
-                        <strong>{{ $coach->name }}</strong>
-                        <div class="text-secondary small">{{ $coach->kana }} / {{ $coach->roman_name }}</div>
-                        <a class="small" href="{{ route('coaches.show',$coach) }}">Public profile</a>
-                    </td>
-                    <td>{{ $coach->main_prefecture }}</td>
-                    <td><span class="badge badge-soft">{{ $coach->is_student ? 'student' : 'general' }}</span></td>
-                    <td>{{ implode(' / ', (array)$coach->fields) }}</td>
-                    <td>
-                        <span class="badge badge-soft">{{ $coach->verification_status }}</span>
-                        <div class="d-flex gap-1 my-2">
-                            @if($hasIdentityDocument)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'identity']) }}">ID</a>@else<span class="badge text-bg-secondary">ID missing</span>@endif
-                            @if($hasQualificationDocument)<a class="btn btn-outline-light btn-sm" href="{{ route('coaches.documents.download',[$coach,'qualification']) }}">Cert</a>@else<span class="badge text-bg-secondary">Cert missing</span>@endif
-                        </div>
-                        <form method="post" action="{{ route('admin.coaches.verify',$coach) }}" class="d-flex gap-1">
-                            @csrf
-                            @method('PATCH')
-                            <select class="form-select form-select-sm" name="verification_status" aria-label="{{ $coach->name }} verification status">
-                                @if(!$isVerified && $coach->verification_status !== 'rejected')<option value="" selected>Select</option>@endif
-                                <option value="verified" {{ $isVerified ? 'selected' : '' }} {{ !$hasRequiredDocuments && !$isVerified ? 'disabled' : '' }}>verified</option>
-                                <option value="rejected" {{ $coach->verification_status === 'rejected' ? 'selected' : '' }}>rejected</option>
-                            </select>
-                            <button class="btn btn-primary btn-sm" type="submit">Set</button>
-                        </form>
-                        @error('coach_verification_'.$coach->id)<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                    </td>
-                    <td><span class="badge badge-soft">{{ $coach->status }}</span></td>
-                    <td>{{ optional($coach->user)->email }}</td>
-                    <td>
-                        <form method="post" action="{{ route('admin.coaches.status',$coach) }}" class="d-grid gap-2">
-                            @csrf
-                            @method('PATCH')
-                            <select class="form-select form-select-sm" name="status" aria-label="{{ $coach->name }} profile status">
-                                @foreach(['pending','approved','rejected','suspended'] as $status)
-                                    <option value="{{ $status }}" {{ $coach->status === $status ? 'selected' : '' }} {{ $status === 'approved' && !$isVerified ? 'disabled' : '' }}>{{ $status }}</option>
-                                @endforeach
-                            </select>
-                            <button class="btn btn-primary btn-sm" type="submit">Update</button>
-                        </form>
-                        @if(!$isVerified)<div class="text-warning small mt-2">Verify first</div>@endif
-                        @error('coach_status_'.$coach->id)<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="9" class="text-secondary">&#25351;&#23566;&#32773;&#12487;&#12540;&#12479;&#12399;&#12354;&#12426;&#12414;&#12379;&#12435;&#12290;</td></tr>
-            @endforelse
-            </tbody>
-        </table>
+<section class="admin-panel admin-list-panel">
+    <header class="admin-list-heading">
+        <div><div class="admin-eyebrow">COACH REVIEW QUEUE</div><h2>登録・公開審査</h2><p>指導者の登録情報、紹介者、確認書類、修正依頼を一か所で確認できます。</p></div>
+        <a class="btn btn-outline-light" href="{{ route('admin.export','coaches') }}">CSV出力</a>
+    </header>
+
+    <form class="admin-filter-grid" method="get">
+        <label><span>キーワード</span><input class="form-control" name="keyword" value="{{ request('keyword') }}" placeholder="氏名・都道府県・分野・競技"></label>
+        <label><span>公開状態</span><select class="form-select" name="status"><option value="">すべて</option>@foreach(['pending','approved','rejected','suspended'] as $status)<option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>{{ $status }}</option>@endforeach</select></label>
+        <label><span>確認状態</span><select class="form-select" name="verification_status"><option value="">すべて</option>@foreach(['pending','verified','rejected'] as $status)<option value="{{ $status }}" {{ request('verification_status') === $status ? 'selected' : '' }}>{{ $status }}</option>@endforeach</select></label>
+        <label><span>登録区分</span><select class="form-select" name="student"><option value="">すべて</option><option value="1" {{ request('student') === '1' ? 'selected' : '' }}>学生</option><option value="0" {{ request('student') === '0' ? 'selected' : '' }}>一般</option></select></label>
+        <button class="btn btn-primary" type="submit">絞り込む</button>
+    </form>
+
+    <div class="coach-review-list">
+        @forelse($coaches as $coach)
+            @php
+                $photo = $coach->photo_path ? (\Illuminate\Support\Str::startsWith($coach->photo_path, 'images/') ? asset($coach->photo_path) : asset('storage/'.$coach->photo_path)) : asset('images/sample-coach-profile.png');
+                $documentCount = (int) filled($coach->identity_document_path) + (int) filled($coach->qualification_document_path);
+            @endphp
+            <article class="coach-review-row">
+                <img src="{{ $photo }}" alt="" class="coach-review-avatar" onerror="this.onerror=null;this.src='{{ asset('images/sample-coach-profile.png') }}'">
+                <div class="coach-review-person"><span>#{{ $coach->id }} / {{ $coach->main_prefecture }}</span><h3>{{ $coach->name }}</h3><p>{{ optional($coach->user)->email }}</p></div>
+                <div class="coach-review-referrer"><span>紹介者</span><strong>{{ optional($coach->user)->referrer ?: '未登録' }}</strong><small>推薦者 {{ count((array) $coach->recommendations) }}名</small></div>
+                <div class="coach-review-checks"><div><span>書類</span><strong>{{ $documentCount }}/2</strong></div><div><span>本人・資格</span><strong>{{ $coach->verification_status }}</strong></div><div><span>修正依頼</span><strong class="{{ $coach->open_revision_requests_count ? 'text-warning' : '' }}">{{ $coach->open_revision_requests_count }}</strong></div></div>
+                <div class="coach-review-state"><span class="status-chip is-{{ $coach->status }}">{{ $coach->status }}</span><time>{{ optional($coach->profile_updated_at ?: $coach->updated_at)->format('Y.m.d') }}</time></div>
+                <a class="btn btn-primary" href="{{ route('admin.coaches.show', $coach) }}">審査・修正依頼</a>
+            </article>
+        @empty
+            <div class="admin-empty">条件に一致する指導者はいません。</div>
+        @endforelse
     </div>
-    {{ $coaches->links() }}
+    <div class="admin-pagination">{{ $coaches->links() }}</div>
 </section>
 @endsection

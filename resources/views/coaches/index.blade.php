@@ -29,7 +29,7 @@
 <div class="result-grid coach-results">
     @forelse($coaches as $coach)
     @php($photo = $coach->photo_path ? (str_starts_with($coach->photo_path,'images/') ? asset($coach->photo_path) : asset('storage/'.$coach->photo_path)) : asset($loop->even ? 'images/coach-female-editorial.png' : 'images/sample-coach-profile.png'))
-    <article class="result-card coach-card"><a class="result-image coach-card-image" href="{{ route('coaches.show',$coach) }}"><img src="{{ $photo }}" alt="{{ $coach->name }}"><span class="entity-image-label">COACH PROFILE</span></a>
+    <article class="result-card coach-card"><a class="result-image coach-card-image" href="{{ route('coaches.show',$coach) }}"><img src="{{ $photo }}" alt="{{ $coach->name }}" onerror="this.onerror=null;this.src='{{ asset('images/sample-coach-profile.png') }}'"><span class="entity-image-label">COACH PROFILE</span></a>
         <div class="result-card-body">
             <div class="coach-card-tags"><div>@foreach(array_slice((array) $coach->fields, 0, 1) as $field)<span class="badge status">{{ $field }}</span>@endforeach<span class="badge">{{ $coach->main_prefecture }}</span></div>@if($coach->is_student)<span class="student-badge">学生</span>@endif</div>
             <h2><a href="{{ route('coaches.show',$coach) }}">{{ $coach->name }}</a></h2>

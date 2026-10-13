@@ -10,6 +10,7 @@
     <div class="col-md"><div class="glass-card metric"><div class="metric-label">未解決問い合わせ</div><div class="metric-value">{{ $openInquiries }}</div></div></div>
 </div>
 <div class="row g-3 mb-4"><div class="col-md"><div class="glass-card metric"><div class="metric-label">オファー</div><div class="metric-value">{{ $offerCount }}</div></div></div><div class="col-md"><div class="glass-card metric"><div class="metric-label">公開評価</div><div class="metric-value">{{ $reviewCount }}</div></div></div><div class="col-md"><div class="glass-card metric"><div class="metric-label">公開記事</div><div class="metric-value">{{ $articleCount }}</div></div></div></div>
+<div class="row g-3 mb-4"><div class="col-md-4"><a class="glass-card metric d-block text-reset" href="{{ route('admin.coaches.index') }}"><div class="metric-label">対応中のプロフィール修正依頼</div><div class="metric-value">{{ $openRevisionRequestCount }}</div><div class="text-secondary small">指導者審査画面で確認</div></a></div></div>
 <div class="row g-4">
     <div class="col-lg-6">
         <section class="glass-card p-4">

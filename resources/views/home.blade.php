@@ -5,7 +5,7 @@
         <section class="hero-slide hero-slide-coach is-active" id="hero-panel-0" data-hero-panel="0" aria-hidden="false">
             <img class="hero-slide-photo" src="{{ asset('images/sports-coaching-hero-color.png') }}" alt="スポーツ指導者によるチーム指導">
             <div class="hero-mode-copy">
-                <div class="eyebrow">01 / COACH DIRECTORY</div>
+                <div class="eyebrow">COACH DIRECTORY</div>
                 <h1 class="headline">指導者・科学者を<br>地域から探す<strong>{{ number_format($coachTotal) }}名</strong></h1>
                 <p class="lead">本人・資格確認を経た専門家を、<br>日本全国の活動地域から探せます。</p>
                 <a class="hero-text-link" href="{{ route('coaches.index') }}">条件から指導者を探す <span>→</span></a>
@@ -21,13 +21,13 @@
                     @endforeach
                 </div>
             </div>
-            <div class="hero-slide-caption"><span>01</span>COACH</div>
+            <div class="hero-slide-caption">COACH</div>
         </section>
 
         <section class="hero-slide hero-slide-field" id="hero-panel-1" data-hero-panel="1" aria-hidden="true" inert>
             <img class="hero-slide-photo" src="{{ asset('images/track-coaching.png') }}" alt="スポーツ現場での専門指導">
             <div class="hero-mode-copy">
-                <div class="eyebrow">02 / OPEN OPPORTUNITIES</div>
+                <div class="eyebrow">OPEN OPPORTUNITIES</div>
                 <h2 class="headline">専門性を活かせる<br>案件を探す<strong>{{ number_format($jobTotal) }}件</strong></h2>
                 <p class="lead">競技、地域、キーワードから、公開中の指導案件を絞り込めます。</p>
             </div>
@@ -46,13 +46,13 @@
                     <button class="btn" type="submit">案件を探す <span>→</span></button>
                 </form>
             </div>
-            <div class="hero-slide-caption"><span>02</span>FIELD</div>
+            <div class="hero-slide-caption">FIELD</div>
         </section>
 
         <section class="hero-slide hero-slide-team" id="hero-panel-2" data-hero-panel="2" aria-hidden="true" inert>
             <img class="hero-slide-photo" src="{{ asset('images/school-team-practice-color.png') }}" alt="活動中のスポーツチームと部活動">
             <div class="hero-mode-copy">
-                <div class="eyebrow">03 / SPORTS COMMUNITY</div>
+                <div class="eyebrow">SPORTS COMMUNITY</div>
                 <h2 class="headline">地域で活動する<br>チーム・部活を探す<strong>{{ number_format($organizationTotal) }}団体</strong></h2>
                 <p class="lead">活動地域や競技から、指導者を求めているチーム・部活を探せます。</p>
             </div>
@@ -71,7 +71,7 @@
                     <button class="btn" type="submit">チーム・部活を探す <span>→</span></button>
                 </form>
             </div>
-            <div class="hero-slide-caption"><span>03</span>TEAM</div>
+            <div class="hero-slide-caption">TEAM</div>
         </section>
     </div>
     <div class="hero-slider-nav" aria-label="検索モードを選択">@foreach(['COACH','FIELD','TEAM'] as $label)<button class="{{ $loop->first ? 'is-active' : '' }}" type="button" data-hero-slide="{{ $loop->index }}" aria-controls="hero-panel-{{ $loop->index }}" aria-label="{{ $label }}検索を表示" aria-pressed="{{ $loop->first ? 'true' : 'false' }}"><span>0{{ $loop->iteration }}</span><strong>{{ $label }}</strong><i></i></button>@endforeach</div>
@@ -193,7 +193,7 @@
 
 <section class="service-intro">
     <div class="section-copy">
-        <div class="eyebrow">WHY HIGH CLASS</div>
+        <div class="eyebrow">BACK ATHLETE</div>
         <h2>専門性を見える化し、<br>安心して出会える仕組みへ。</h2>
         <p>自称専門家を排除し、トレーニング、メンタル、リハビリ、栄養、映像分析まで、幅広い指導者のプロフィールと実績を見て、相談が可能です。</p><a href="{{ route('coaches.index') }}">指導者一覧を見る →</a>
     </div>
@@ -201,19 +201,19 @@
         <article><span>01</span>
             <div>
                 <h3>リファーラル（紹介制）で実施</h3>
-                <p>運営者や監修者、登録者の紹介で登録が可能なため、安心してご依頼が可能です。</p>
+                <p>運営者や監修者、登録者の紹介制のため安心</p>
             </div>
         </article>
         <article><span>02</span>
             <div>
                 <h3>本人や資格の確認まで対応</h3>
-                <p>本人確認書類と資格書類も確認して、掲載しています。</p>
+                <p>本人確認書類と資格書類も確認して掲載（準備中）</p>
             </div>
         </article>
         <article><span>03</span>
             <div>
                 <h3>直接オファーも可能</h3>
-                <p>事務局に、高額な手数料を取られず依頼が可能です。</p>
+                <p>事務局に、高額な手数料を取られず依頼が可能。</p>
             </div>
         </article>
     </div>
@@ -222,8 +222,8 @@
 <section class="image-story"><img src="{{ asset('images/school-team-practice.png') }}" alt="部活動の指導風景">
     <div>
         <div class="eyebrow">FOR ORGANIZATIONS</div>
-        <h2>困っている人材を探すには、チーム登録が必須！<br>さらに、募集をかけるには、案件の登録が可能</h2>
-        <p>募集案件への応募を待つだけでなく、条件に合う指導者へ直接オファーできます。候補保存、選考履歴、評価まで一つの画面で管理できます。</p><a class="btn" href="{{ route('register') }}">チーム・部活として無料登録</a>
+        <h2>困っている人材を探すには、チーム登録が必須！<br>チーム登録後、案件の募集が可能。</h2>
+        <p>募集案件への応募を待つだけでなく、条件に合う指導者へ直接オファーできます。</p><a class="btn" href="{{ route('register') }}">チーム・部活として無料登録</a>
     </div>
 </section>
 
@@ -328,35 +328,33 @@
     </div>
 </section>
 
-<section class="project-team-section" aria-labelledby="project-team-title">
+<section class="project-team-section" aria-labelledby="project-team-title" data-team-count="{{ str_pad($projectMembers->count(), 2, '0', STR_PAD_LEFT) }}">
     <header class="project-team-heading">
         <div>
             <div class="eyebrow">DEVELOPMENT / OPERATIONS</div>
             <h2 id="project-team-title">開発者・運営者</h2>
         </div>
-        <p>競技現場と専門知をつなぐため、<br>多様なメンバーが運営しています。</p>
+        <p>現場と指導者をつなぐため、多様なメンバーで運営をしています。</p>
     </header>
     <div class="project-team-grid">
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-01.png') }}" alt="上水 研一朗のプロフィール写真" width="444" height="444" loading="lazy"><span class="member-role">PROJECT LEAD</span><p class="member-affiliation">東海大学 上水研究室</p><h3>上水 研一朗</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-02.png') }}" alt="高橋 美咲のプロフィール写真" width="443" height="444" loading="lazy"><span class="member-role">OPERATIONS</span><p class="member-affiliation">Back Athlete機構</p><h3>高橋 美咲</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-03.png') }}" alt="佐藤 健一のプロフィール写真" width="444" height="444" loading="lazy"><span class="member-role">SUPERVISOR</span><p class="member-affiliation">スポーツ科学研究センター</p><h3>佐藤 健一</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-04.png') }}" alt="中村 由佳のプロフィール写真" width="443" height="444" loading="lazy"><span class="member-role">COORDINATOR</span><p class="member-affiliation">地域スポーツ推進室</p><h3>中村 由佳</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-05.png') }}" alt="伊藤 真理のプロフィール写真" width="444" height="443" loading="lazy"><span class="member-role">ADVISOR</span><p class="member-affiliation">アスリート支援事業部</p><h3>伊藤 真理</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-06.png') }}" alt="山本 大輔のプロフィール写真" width="443" height="443" loading="lazy"><span class="member-role">DEVELOPER</span><p class="member-affiliation">株式会社ハイクラス</p><h3>山本 大輔</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-07.png') }}" alt="小林 彩香のプロフィール写真" width="444" height="443" loading="lazy"><span class="member-role">DESIGNER</span><p class="member-affiliation">株式会社ハイクラス</p><h3>小林 彩香</h3></article>
-        <article class="project-member"><img class="member-portrait" src="{{ asset('images/team-member-08.png') }}" alt="松本 拓也のプロフィール写真" width="443" height="443" loading="lazy"><span class="member-role">ENGINEER</span><p class="member-affiliation">株式会社ハイクラス</p><h3>松本 拓也</h3></article>
+        @forelse($projectMembers as $member)
+            @php($memberImage = \Illuminate\Support\Str::startsWith($member->image_path, 'images/') ? asset($member->image_path) : asset('storage/'.$member->image_path))
+            <article class="project-member"><img class="member-portrait" src="{{ $memberImage }}" alt="{{ $member->name }}のプロフィール写真" width="444" height="444" loading="lazy"><span class="member-role">{{ $member->role }}</span><p class="member-affiliation">{{ $member->affiliation }}</p><h3>{{ $member->name }}</h3></article>
+        @empty
+            <p class="project-team-empty">現在、メンバー情報を準備しています。</p>
+        @endforelse
     </div>
 </section>
 
 <section class="dual-cta">
     <article>
         <div class="eyebrow">FOR COACHES</div>
-        <h2>指導の経験を、次の世代へ。</h2>
+        <h2>救るを求める現場へ</h2>
         <p>プロフィールを公開し、全国のチーム・部活とつながる。</p><a class="btn" href="{{ route('register') }}">指導者会員に登録</a>
     </article>
     <article>
         <div class="eyebrow">FOR ORGANIZATIONS</div>
-        <h2>チームに必要な専門家を。</h2>
+        <h2>求める人材を公開！</h2>
         <p>募集掲載と直接オファーで、最適な指導者を探す。</p><a class="btn" href="{{ route('register') }}">チーム・部活会員に登録</a>
     </article>
 </section>

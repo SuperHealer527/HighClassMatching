@@ -13,7 +13,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
 @endphp
 
 <section class="detail-hero profile-detail-hero compact-profile-hero">
-    <div class="detail-hero-media"><img src="{{ $photo }}" alt="{{ $coach->name }}"></div>
+    <div class="detail-hero-media"><img src="{{ $photo }}" alt="{{ $coach->name }}" onerror="this.onerror=null;this.src='{{ asset('images/sample-coach-profile.png') }}'"></div>
     <div class="detail-hero-content">
         <div class="eyebrow">COACH PROFILE</div>
         <div class="detail-badges">@forelse(array_slice((array) $coach->fields, 0, 1) as $field)<span class="badge status">{{ $field }}</span>@empty<span class="badge status">専門分野未設定</span>@endforelse<span class="badge">{{ $coach->main_prefecture }}</span>@if($coach->is_student)<span class="student-badge">学生</span>@endif</div>

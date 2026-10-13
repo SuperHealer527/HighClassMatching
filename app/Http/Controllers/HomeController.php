@@ -6,6 +6,7 @@ use App\Models\CoachProfile;
 use App\Models\Job;
 use App\Models\Article;
 use App\Models\Organization;
+use App\Models\ProjectMember;
 
 class HomeController extends Controller
 {
@@ -40,6 +41,7 @@ class HomeController extends Controller
             'featuredCoaches' => CoachProfile::withAvg('reviews', 'rating')->publiclyVisible()->latest('profile_updated_at')->take(4)->get(),
             'featuredJobs' => Job::with('organization')->publiclyVisible()->latest('publish_start_at')->take(4)->get(),
             'articles' => Article::published()->latest('published_at')->take(3)->get(),
+            'projectMembers' => ProjectMember::visible()->orderBy('sort_order')->orderBy('id')->get(),
         ]);
     }
 }
