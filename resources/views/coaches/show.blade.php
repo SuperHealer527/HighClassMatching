@@ -20,11 +20,6 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <h1>{{ $coach->name }}</h1>
         <p class="detail-subtitle">{{ $coach->kana }} @if($coach->roman_name)<span>/ {{ $coach->roman_name }}</span>@endif</p>
         <p class="detail-message">{{ $coach->affiliation ?: 'フリーランス指導者' }}</p>
-        <div class="hero-metrics">
-            <div><strong>{{ min(1, count((array) $coach->fields)) }}</strong><span>専門分野</span></div>
-            <div><strong>{{ max(1, count((array) $coach->available_prefectures)) }}</strong><span>対応地域</span></div>
-            <div><strong>{{ $coach->completeness_score }}%</strong><span>プロフィール<br>充実度</span></div>
-        </div>
     </div>
 </section>
 
@@ -54,28 +49,24 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
                 <dd>{{ $coach->degree ?: '未設定' }}</dd>
             </div>
             <div>
-                <dt>分野</dt>
-                <dd>{{ collect((array) $coach->fields)->first() ?: '未設定' }}</dd>
-            </div>
-            <div>
-                <dt>専門競技</dt>
-                <dd>{{ implode(' / ', (array) $coach->sports) ?: '未設定' }}</dd>
-            </div>
-            <div>
                 <dt>資格</dt>
                 <dd>@forelse($qualifications as $index => $item)<span class="profile-list-line"><b>{{ $index === 0 ? '①' : '②' }}</b>{{ $item }}</span>@empty 未設定 @endforelse</dd>
+            </div>
+            <div>
+                <dt>現在の拠点</dt>
+                <dd>{{ $coach->main_prefecture }}{{ $coach->area ? ' / '.$coach->area : '' }}</dd>
             </div>
             <div>
                 <dt>対応可能地域</dt>
                 <dd>{{ implode(' / ', $coach->available_prefectures ?: [$coach->main_prefecture]) }}</dd>
             </div>
             <div>
-                <dt>登録区分</dt>
-                <dd>{{ $coach->is_student ? '学生' : '一般・社会人' }}</dd>
+                <dt>専門競技</dt>
+                <dd>{{ implode(' / ', (array) $coach->sports) ?: '未設定' }}</dd>
             </div>
             <div>
-                <dt>現在の拠点</dt>
-                <dd>{{ $coach->main_prefecture }}{{ $coach->area ? ' / '.$coach->area : '' }}</dd>
+                <dt>登録区分</dt>
+                <dd>{{ $coach->is_student ? '学生' : '一般・社会人' }}</dd>
             </div>
             <div>
                 <dt>最終更新日時</dt>
@@ -113,7 +104,7 @@ $mediatedOfferUrl = route('inquiries.create', ['coach' => $coach->id, 'mode' => 
         <div class="detail-section-title"><span>03</span>
             <div>
                 <div class="eyebrow">VOICE & MESSAGE</div>
-                <h2>評価とメッセージ</h2>
+                <h2>推薦メッセージ</h2>
             </div>
         </div>
         <div class="recommendation-grid">

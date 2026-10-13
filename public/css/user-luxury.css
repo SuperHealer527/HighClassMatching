@@ -7785,6 +7785,177 @@ a:active {
     }
 }
 
+/* Coach profile information hierarchy revision */
+.compact-profile-hero .detail-message {
+    position: relative;
+    margin-top: 18px;
+    padding: 24px 0 0 42px;
+    border-top: 1px solid rgba(255, 255, 255, .18);
+    font-size: 14px;
+}
+
+.compact-profile-hero .detail-message::before {
+    position: absolute;
+    top: 31px;
+    left: 0;
+    width: 26px;
+    height: 2px;
+    background: var(--accent);
+    content: "";
+}
+
+.coach-basic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(5, minmax(72px, auto));
+    grid-auto-flow: column;
+}
+
+.coach-basic-grid > div:nth-child(odd) {
+    border-right: 0;
+}
+
+.coach-basic-grid > div:nth-child(-n + 5) {
+    border-right: 1px solid #d8d8d3;
+}
+
+.coach-basic-grid > div:nth-child(5),
+.coach-basic-grid > div:last-child {
+    border-bottom: 0;
+}
+
+.profile-records-panel .achievement-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 12px 34px 34px;
+}
+
+.profile-records-panel .achievement-columns > div {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 30px;
+    align-items: start;
+    padding: 28px 0;
+}
+
+.profile-records-panel .achievement-columns h3 {
+    position: sticky;
+    top: 112px;
+    margin: 0;
+    padding-top: 3px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.profile-records-panel .achievement-columns ol {
+    border-top: 1px solid #ddd;
+}
+
+.profile-records-panel .achievement-columns li {
+    min-height: 58px;
+    padding: 17px 14px 17px 52px;
+    border-top: 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.profile-records-panel .achievement-columns li::before {
+    top: 18px;
+    left: 12px;
+}
+
+.recommendation-grid {
+    gap: 20px;
+}
+
+.recommendation-card {
+    border: 1px solid #cecec9;
+    border-top: 0;
+    background: #fff;
+}
+
+.recommendation-card-image {
+    aspect-ratio: 16 / 10;
+}
+
+.recommendation-card-body {
+    min-height: 220px;
+    padding: 30px 28px 34px;
+}
+
+.recommendation-card-body::before {
+    position: absolute;
+    top: 25px;
+    right: 24px;
+    color: #e6e6e1;
+    content: "“";
+    font: 500 62px/.8 Georgia, serif;
+    pointer-events: none;
+}
+
+.recommendation-card-body > span {
+    position: relative;
+    z-index: 1;
+}
+
+.recommendation-card h3 {
+    position: relative;
+    z-index: 1;
+    margin: 18px 0 16px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #deded9;
+    font-size: 18px;
+}
+
+.recommendation-card p {
+    position: relative;
+    z-index: 1;
+    margin-top: 0;
+    color: #333;
+    font-size: 14px;
+    line-height: 2;
+}
+
+@media (max-width: 760px) {
+    .compact-profile-hero .detail-message {
+        padding-left: 36px;
+    }
+
+    .coach-basic-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+
+    .coach-basic-grid > div:nth-child(-n + 5) {
+        border-right: 0;
+    }
+
+    .coach-basic-grid > div:nth-child(5) {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .profile-records-panel .achievement-columns {
+        padding: 8px 20px 28px;
+    }
+
+    .profile-records-panel .achievement-columns > div {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 24px 0;
+    }
+
+    .profile-records-panel .achievement-columns h3 {
+        position: static;
+    }
+
+    .recommendation-card-body {
+        min-height: 0;
+        padding: 26px 22px 30px;
+    }
+}
+
 /* Homepage news and project team */
 .home-news-section {
     display: grid;
