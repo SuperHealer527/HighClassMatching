@@ -3,7 +3,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }} | Highclass Inc.</title>
+    <title>@yield('meta_title', '完全無料 │ Back Athlete Matching')</title>
+    <meta name="description" content="@yield('meta_description', '指導者や栄養士など、競技力向上を支える人のマッチングプラットフォーム！')">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Back Athlete Matching">
+    <meta property="og:title" content="@yield('meta_title', '完全無料 │ Back Athlete Matching')">
+    <meta property="og:description" content="@yield('meta_description', '指導者や栄養士など、競技力向上を支える人のマッチングプラットフォーム！')">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('images/sports-coaching-hero-color.png') }}">
+    <meta property="og:image:width" content="1672">
+    <meta property="og:image:height" content="941">
+    <meta property="og:image:alt" content="スポーツ指導者によるチーム指導">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('meta_title', '完全無料 │ Back Athlete Matching')">
+    <meta name="twitter:description" content="@yield('meta_description', '指導者や栄養士など、競技力向上を支える人のマッチングプラットフォーム！')">
+    <meta name="twitter:image" content="{{ asset('images/sports-coaching-hero-color.png') }}">
     <style>
         :root{--ink:#172033;--muted:#667085;--line:#e4e7ec;--brand:#243f8f;--brand-2:#2f71d0;--accent:#c0212d;--paper:#f7f5ef;--shadow:0 18px 48px rgba(24,36,64,.11)}
         *{box-sizing:border-box}body{margin:0;font-family:'Yu Gothic','Meiryo',system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fbfaf6 0%,#f1f6fa 100%);line-height:1.7}a{color:var(--brand);text-decoration:none}a:hover{text-decoration:underline}
